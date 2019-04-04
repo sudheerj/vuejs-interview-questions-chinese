@@ -4,12 +4,12 @@
 
 列出了 300 道 VueJS 面试题
 
-> 点击 :star:如果你喜欢这个项目。Pull Requests 是非常赞赏的。
+> 如果你喜欢这个项目点击 :star:，Pull Requests 是非常赞赏的。
 
-## 内容表格
+## 内容列表
 -------------------------------------------------------------------
-| 序号 | 问题                                                                                                                |
-|------|---------------------------------------------------------------------------------------------------------------------|
+| 序号 | 问题                                                                                                             |
+|------|------------------------------------------------------------------------------------------------------------------|
 | 1    | [VueJS 是什么？](#1-vuejs-是什么)                                                                                |
 | 2    | [VueJS 的主要功能是什么？](#2-vuejs-的主要功能是什么)                                                            |
 | 3    | [VueJS 的生命周期方法是什么？](#3-vuejs-的生命周期方法是什么)                                                    |
@@ -20,6 +20,16 @@
 | 8    | [如何实现条件组元素？](#8-如何实现条件组元素)                                                                    |
 | 9    | [如何复用有 key 属性的元素？](#9-如何复用有-key-属性的元素)                                                      |
 | 10   | [为什么不能在同一个元素上同时使用 v-if 和 v-for 指令？](#10-为什么不能在同一个元素上同时使用-v-if-和-v-for-指令) |
+| 11   | [为什么使用 for 指令时需要 key 属性？](#11-为什么使用-for-指令时需要-key-属性)                                   |
+| 12   | [什么是数组检测突变的方法？](#12-什么是数组检测突变的方法)                                                       |
+| 13   | [什么是数组检测非突变方法？](#13-什么是数组检测非突变方法)                                                       |
+| 14   | [检测数组变化有什么注意事项？](#14-检测数组变化有什么注意事项)                                                   |
+| 15   | [检测对象变化有什么注意事项？](#15-检测对象变化有什么注意事项)                                                   |
+| 16   | [如何在一个范围内使用 v-for 指令？](#16-如何在一个范围内使用-v-for-指令)                                         |
+| 17   | [如何在模板上使用 v-for 指令？](#17-如何在模板上使用-v-for-指令)                                                 |
+| 18   | [如何使用事件处理程序？](#18-如何使用事件处理程序)                                                               |
+| 19   | [Vue 提供的事件修饰符是什么？](#19-Vue-提供的事件修饰符是什么)                                                   |
+| 20   | [什么是 key 修饰符？](#20-什么是-key-修饰符)                                                                     |
 
 ## 1. VueJS 是什么？
 
@@ -166,8 +176,8 @@
         }
         },
         beforeDestroy: function() {
-        this.message = null
-        delete this.message
+            this.message = null
+            delete this.message
         }
     })
     ```
@@ -177,7 +187,7 @@
     ```javascript
     new Vue ({
         destroyed: function() {
-        console.log(this) // Nothing to show here
+            console.log(this) // Nothing to show here
         }
     })
     ```
@@ -188,13 +198,13 @@ VueJS 提供了通过指令基于条件来显示或隐藏元素。可用的指�
     
 **1. v-if:**  v-if 指令基于给定的表达式添加或移除 DOM 元素，下面的 button 在 isLoggedIn 被设置为 false 时不会显示。
 
-```javascript
+```html
 <button v-if="isLoggedIn">Logout</button>
 ```
 
 将全部元素都包在一个 `<template>` 元素里这样也可以使用一个 v-if 指令基于条件控制多个元素。例如，你可以将条件同事应用于 label 和 button。
 
-```javascript
+```html
 <template v-if="isLoggedIn">
     <label> Logout </button>
     <button> Logout </button>
@@ -204,7 +214,7 @@ VueJS 提供了通过指令基于条件来显示或隐藏元素。可用的指�
 **2. v-else:**  这个指令只会在相邻的 v-if 条件为 false 时用来显示内容。这类似于任何编程语言中的 else 块用来显示可选的内容，并且在它前面是 v-if 或 v-else-if 块。你不需要传递任何值给它。
 例如，v-else 在 isLoggedIn 被设置为 false （未登录）时显示 LogIn 按钮。
 
-```javascript
+```html
 <button v-if="isLoggedIn"> Logout </button>
 <button v-else> Log In </button>
 ```
@@ -212,7 +222,7 @@ VueJS 提供了通过指令基于条件来显示或隐藏元素。可用的指�
 **3. v-else-if:** 当我们需要两个以上选项检查时，就会用到这个指令。
 例如，当 ifLoginDisabled 属性被设置为 true 时我们想要显示一些文案替代 LogIn 按钮。这就可以通过 v-else 指令实现。
 
-```javascript
+```html
 <button v-if="isLoggedIn"> Logout </button>
 <label v-else-if="isLoginDisabled"> User login disabled </label>
 <button v-else> Log In </button>
@@ -220,7 +230,7 @@ VueJS 提供了通过指令基于条件来显示或隐藏元素。可用的指�
 
 **4. v-show:** 这个指令类似于 v-if，但是它会将所有元素渲染到 DOM 中并通过 CSS 的 display 属性来 显示 /隐藏 元素。这个指令被推荐用于需要频繁切换开关的元素。
 
-```javascript
+```html
 <span v-show="user.name">Welcome user,{{user.name}}</span>
 ```
 ## 5. v-show 和 v-if 指令有什么不同？
@@ -241,17 +251,17 @@ VueJS 提供了通过指令基于条件来显示或隐藏元素。可用的指�
 ```javascript
 <ul id="list">
     <li v-for="(item, index) in items">
-    {{ index }} - {{ item.message }}
+        {{ index }} - {{ item.message }}
     </li>
 </ul>
 
 var vm = new Vue({
     el: '#list',
     data: {
-    items: [
-        { message: 'John' },
-        { message: 'Locke' }
-    ]
+        items: [
+            { message: 'John' },
+            { message: 'Locke' }
+        ]
     }
 })
 ```
@@ -263,18 +273,18 @@ var vm = new Vue({
 ```javascript
 <div id="object">
     <div v-for="(value, key, index) in user">
-    {{ index }}. {{ key }}: {{ value }}
+        {{ index }}. {{ key }}: {{ value }}
     </div>
 </div>
 
 var vm = new Vue({
     el: '#object',
     data: {
-    user: {
-        firstName: 'John',
-        lastName: 'Locke',
-        age: 30
-    }
+        user: {
+            firstName: 'John',
+            lastName: 'Locke',
+            age: 30
+        }
     }
 })
 ```
@@ -295,7 +305,7 @@ var vm = new Vue({
 
 你可以通过对元素组的不可见（不渲染）包装元素 `<template>` 应用 **v-if** 指令实现条件元素组（一次切换多个元素）。例如，你可以根据有效的用户条件对用户详情分组。
 
-```javascript
+```html
 <template v-if="condition">
     <h1>Name</h1>
     <p>Address</p>
@@ -307,7 +317,7 @@ var vm = new Vue({
     
 Vue 总是尝试尽可能高效地渲染元素。因此它会试图用重用元素替代从零开始构建。但这种行为会在有些情况下导致一些问题。例如，如果你尝试在 `v-if` 和 `v-else` 块中渲染同样的 input 元素，它将会像下面这样在切换后保留先前的值，
 
-```javascript
+```html
 <template v-if="loginType === 'Admin'">
     <label>Admin</label>
     <input placeholder="Enter your ID">
@@ -320,7 +330,7 @@ Vue 总是尝试尽可能高效地渲染元素。因此它会试图用重用元�
 
 这种情况下，它不应该重用。我们可以像下面这样在 input 元素上使用 **key** 属性分离，
 
-```javascript
+```html
 <template v-if="loginType === 'Admin'">
     <label>Admin</label>
     <input placeholder="Enter your ID" key="admin-id">
@@ -339,7 +349,7 @@ Vue 总是尝试尽可能高效地渲染元素。因此它会试图用重用元�
 
 1. 过滤列表的项。例如，如果你尝试使用 v-if 标记过滤列表，
     
-```javascript
+```html
 <ul>
     <li
         v-for="user in users"
@@ -357,7 +367,7 @@ Vue 总是尝试尽可能高效地渲染元素。因此它会试图用重用元�
 computed: {
     activeUsers: function () {
         return this.users.filter(function (user) {
-        return user.isActive
+            return user.isActive
         })
     }
 }
@@ -366,7 +376,8 @@ computed: {
 <ul>
     <li
         v-for="user in activeUsers"
-        :key="user.id">
+        :key="user.id"
+    >
         {{ user.name }}
     <li>
 </ul>
@@ -375,7 +386,7 @@ computed: {
     
 2. 避免渲染应该被隐藏的列表。例如，你想根据条件检查用户是否显示还是隐藏
 
-```javascript
+```html
 <ul>
     <li
         v-for="user in users"
@@ -389,7 +400,7 @@ computed: {
 
 可以移动条件到父级避免对每一个用户检查
 
-```javascript
+```html
 <ul v-if="shouldShowUsers">
     <li
         v-for="user in users"
@@ -399,3 +410,214 @@ computed: {
     <li>
 </ul>
 ```
+
+## 11. 为什么使用 for 指令时需要 key 属性？
+
+为了跟踪每个节点的特征，从而重用和重排存在的元素，你需要为每一个 `v-for` 迭代的项提供一个 `key` 属性。一个理想的 key 值是条目的唯一 id，让我们举个例子，
+
+```html
+<div v-for="item in items" :key="item.id">
+    {{item.name}}
+</div>
+```
+
+因此，只要有可能，总是建议给 v-for 提供一个 key 值，除非迭代的 DOM 内容很简单。
+**Note:** 不应该使用非基本类型的值，如对象和数组作为 v-for 的 key。使用 String 或 Number 类型替代。
+
+## 12. 什么是数组检测突变的方法？
+
+顾名思义，突变方法修改原生数组。以下列出了能触发视图更新的数组突变方法。
+
+1. push()
+2. pop()
+3. shift()
+4. unshift()
+5. splice()
+6. sort()
+7. reverse()
+
+如果执行以上任何一个突变方法都回触发试图更新。
+
+```javascript
+vm.todos.push({ message: 'Baz' })
+```
+
+## 13. 什么是数组检测非突变方法？
+
+不改变原始数组但总是返回一个新的数组就叫非突变方法。以下列出了非突变方法，
+
+1. filter()
+2. concat()
+3. slice()
+
+以一个 todo list 为例，在列表中根据 status 过滤的新数组替换旧数组，
+
+```javascript
+vm.todos = vm.todos.filter(function (todo) {
+    return todo.status.match(/Completed/)
+})
+```
+
+由于 VueJS 的实现，这种方法不会重新渲染整个列表。
+
+## 14. 检测数组变化有什么注意事项？
+
+以下两种清空 Vue 不能检测数组的变化，
+
+1. 直接根据索引设置项，例如
+
+```javascript
+vm.todos[indexOfTodo] = newTodo
+```
+
+2. 修改数组的长度，例如
+
+```javascript
+vm.todos.length = todosLength
+```
+
+可以通过使用 `set` 和 `splice` 方法克服这两种警告，让我们 看一下解决实例，
+
+**第一个解决方案**
+
+```javascript
+// Vue.set
+Vue.set(vm.todos, indexOfTodo, newTodoValue)
+// (or)
+// Array.prototype.splice
+vm.todos.splice(indexOfTodo, 1, newTodoValue)
+```
+
+**第二个解决方案**
+
+```javascript
+vm.todos.splice(todosLength)
+```
+
+## 15. 检测对象变化有什么注意事项？
+
+Vue 在对象属性增删时无法检测到更改。以 user 数据改变为例，
+
+```javascript
+var vm = new Vue({
+    data: {
+        user: {
+            name: 'John'
+        }
+    }
+})
+
+// `vm.name` is now reactive
+
+vm.email = 'john@email.com' // `vm.email` is NOT reactive
+```
+
+可以通过使用 Vue.set(object, key, value) 方法或 Object.assign() 克服这个情况。
+
+```javascript
+Vue.set(vm.user, 'email', john@email.com);
+(or)
+vm.user = Object.assign({}, vm.user, {
+    email: john@email.com
+})
+```
+
+## 16. 如何在一个范围内使用 v-for 指令？
+
+可以使用一个整数作为 v-for 指令重复元素的次数。
+
+```javascript
+<div>
+    <span v-for="n in 20">{{ n }} </span>
+</div>
+```
+
+它会显示数字 1-20
+
+## 17. 如何在模板上使用 v-for 指令？
+
+就类似于 v-if 指令在木板上一样，也可以使用带有 v-for 指令的 `<template>` 标签来渲染多个元素块。以 todo 为例，
+
+```javascript
+<ul>
+    <template v-for="todo in todos">
+        <li>{{ todo.title }}</li>
+        <li class="divider"></li>
+    </template>
+</ul>
+```
+
+## 18. 如何使用事件处理程序？
+
+你可以在 Vue 中使用类似于纯 JavaScript 的事件处理程序。方法调用也支持特殊的 $event 变量。
+
+```javascript
+<button v-on:click="show('Welcome to VueJS world', $event)">
+    Submit
+</button>
+
+methods: {
+    show: function (message, event) {
+        // now we have access to the native event
+        if (event) event.preventDefault()
+        console.log(message);
+    }
+}
+```
+
+## 19. Vue 提供的事件修饰符是什么？
+
+通常，JavaScript 提供了 event.preventDefault() 或 event.stopPropagation() 在事件处理程序中。你可以使用 Vue 提供的方法，但这些方法用于数据逻辑而不是处理 DOM 事件。Vue 为 v-on 提供了以下事件修饰符，`.` 表示指令后缀。
+
+1. .stop
+2. .prevent
+3. .capture
+4. .self
+5. .once
+6. .passive
+
+以 stop 修饰符为例，
+
+```html
+<!-- the click event's propagation will be stopped -->
+<a v-on:click.stop="methodCall"></a>
+```
+
+也可以像下面这样链接修饰符，
+
+```html
+<!-- modifiers can be chained -->
+<a v-on:click.stop.prevent="doThat"></a>
+```
+
+## 20. 什么是 key 修饰符？
+
+Vue 支持 v-on 的 key 修饰符处理键盘事件。以输入 keycode 的 keyup 事件为例。
+
+```html
+<!-- only call `vm.show()` when the `keyCode` is 13 -->
+<input v-on:keyup.13="show">
+```
+
+记住全部 keycode 真的很难。它支持完整 keycode 列表别名
+
+1. .enter
+2. .tab
+3. .delete (捕获 “Delete” 和 “Backspace” 键)
+4. .esc
+5. .space
+6. .up
+7. .down
+8. .left
+9. .right
+
+现在上面的代码使用别名重写如下，
+
+```html
+<input v-on:keyup.enter="submit">
+<!-- (OR) -->
+<!-- with shorthand notation -->
+<input @keyup.enter="submit">
+```
+
+**不赞成使用 keycode 事件，新的浏览器可能会不支持。**

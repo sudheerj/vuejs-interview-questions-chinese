@@ -1,13 +1,13 @@
 # VueJS 面试题
 
-英文版：[vuejs-interview-questions](https://github.com/sudheerj/vuejs-interview-questions)
+Original English version: [vuejs-interview-questions](https://github.com/sudheerj/vuejs-interview-questions)
 
 列出了 300 道 VueJS 面试题
 
 > 如果你喜欢这个项目点击 :star:，Pull Requests 是非常赞赏的。
 
 ## 内容列表
--------------------------------------------------------------------
+
 | 序号 | 问题                                                                                                             |
 |------|------------------------------------------------------------------------------------------------------------------|
 | 1    | [VueJS 是什么？](#1-vuejs-是什么)                                                                                |
@@ -30,6 +30,16 @@
 | 18   | [如何使用事件处理程序？](#18-如何使用事件处理程序)                                                               |
 | 19   | [Vue 提供的事件修饰符是什么？](#19-Vue-提供的事件修饰符是什么)                                                   |
 | 20   | [什么是 key 修饰符？](#20-什么是-key-修饰符)                                                                     |
+| 21   | [如何自定义 key 修饰符别名？](#21-如何自定义-key-修饰符别名)                                                     |
+| 22   | [支持什么系统 keys 修饰符？](#22-支持什么系统-keys-修饰符)                                                       |
+| 23   | [支持什么鼠标按钮修饰符？](#23-支持什么鼠标按钮修饰符)                                                           |
+| 24   | [如何实现双向绑定？](#24-如何实现双向绑定)                                                                       |
+| 25   | [model 支持什么修饰符？](#25-model-支持什么修饰符)                                                               |
+| 26   | [组件是什么并给个例子？](#26-组件是什么并给个例子)                                                               |
+| 27   | [props 是什么？](#27-props-是什么)                                                                               |
+| 28   | [何时需要一个单独的根元素？](#28-何时需要一个单独的根元素)                                                       |
+| 29   | [父子组件如何通过事件通信？](#29-父子组件如何通过事件通信)                                                       |
+| 30   | [怎样在自定义输入框组件上实现 model？](#30-怎样在自定义输入框组件上实现-model)                                   |
 
 ## 1. VueJS 是什么？
 
@@ -621,3 +631,202 @@ Vue 支持 v-on 的 key 修饰符处理键盘事件。以输入 keycode 的 keyu
 ```
 
 **不赞成使用 keycode 事件，新的浏览器可能会不支持。**
+
+## 21. 如何自定义 key 修饰符别名？
+
+你可以通过全局属性 `config.keyCodes` 自定义 key 修饰符别名。对于这个属性，有一些指导
+
+1. 不能使用驼峰，反而你可以使用带双引号的 kebab-case；
+2. 可以使用数组格式定义多个值；
+
+```javascript
+Vue.config.keyCodes = {
+    f1: 112,
+    "media-play-pause": 179,
+    down: [40, 87]
+}
+```
+
+## 22. 支持什么系统 keys 修饰符？
+
+Vue 支持以下修饰符在相应的键被按下时触发鼠标或键盘事件监听器，
+
+1. .ctrl
+2. .alt
+3. .shift
+4. .meta
+
+以 点击事件的 control 修饰符举例，
+
+```html
+<!-- Ctrl + Click -->
+<div @click.ctrl="doSomething">Do something</div>
+```
+
+## 23. 支持什么鼠标按钮修饰符？
+
+Vue 支持以下鼠标按钮修饰符
+
+1. .left
+2. .right
+3. .middle
+
+举例，以下是 `.right` 修饰符的用法
+
+```html
+<button
+v-if="button === 'right'"
+v-on:mousedown.right="increment"
+v-on:mousedown.left="decrement"
+/>
+```
+
+## 24. 如何实现双向绑定？
+
+可以使用 `v-model` 指令为 input textarea 和选择元素创建数据双向绑定。使用 input 组件举例，
+
+```html
+<input v-model="message" placeholder="Enter input here">
+<p>The message is: {{ message }}</p>
+```
+
+记住，v-model 将忽略任何表单元素上的初始 `value`，`checked` 或 `selected` 属性。
+因此总是使用 Vue 实例 data 作为真值来源。
+
+## 25. model 支持什么修饰符？
+
+v-model 指令支持 3 种修饰符。
+
+**1. lazy:** 默认情况下，v-model 在输入框每次 input 事件后同步数据。你可以添加 lazy 修饰符使在 change 事件后同步。
+
+```html
+<!-- synced after "change" instead of "input" -->
+<input v-model.lazy="msg" >
+```
+
+**2. number:** 如果你想将用户输入的自动格式转换为一个数字，你可以给 v-model 添加一个 number 修饰符。即使使用 type="number"，HTML input 元素返回的值总是一个字符串。因此这个类型转换修饰符使很必要的。
+
+```html
+<input v-model.number="age" type="number">
+```
+
+**3. trim:** 如果你想要将用户输入的空格自动修剪，你可以给 v-model 添加一个 trim 修饰符。
+
+```html
+<input v-model.trim="msg">
+```
+
+## 26. 组件是什么并给个例子？
+
+组件是一个有名字的可重用 Vue 实例。接受与 new Vue 相同的选项，例如 data computed watch methods 和 生命周期钩子（除了 root 特有一些选项如 el）。以计数器组件为例，
+
+```javascript
+// 定义一个叫 button-counter 的组件
+Vue.component('button-counter', {
+    template: '<button v-on:click="count++">You clicked me {{ count }} times.</button>'
+    data: function () {
+        return {
+        count: 0
+        }
+    },
+})
+```
+
+让我们在 new Vue 创建的 Vue 根实例中使用这个组件
+
+```html
+<div id="app">
+    <button-counter></button-counter>
+</div>
+
+var vm = new Vue({ el: '#app' });
+```
+
+## 27. props 是什么？
+
+Props 是你可以注册在组件上的自定义属性。当一个值传递给 prop 属性时，它就成为了组件实例的属性。你可以传递一个值的列表作为 props 选项，使用它们类似于模板中的 data 变量。
+
+```javascript
+Vue.component('todo-item', {
+    props: ['title'],
+    template: '<h2>{{ title }}</h2>'
+})
+```
+
+注册 props 后，可以将它们作为自定义属性传递。
+
+```html
+<todo-item title="Learn Vue conceptsnfirst"></todo-item>
+```
+
+## 28. 何时需要一个单独的根元素？
+
+每一个模板有 **包含有多个元素** 的组件必须有一个根元素。这种情况下，你需要将元素们通过一个父元素包裹。
+
+```html
+<div class="todo-item">
+    <h2>{{ title }}</h2>
+    <div v-html="content"></div>
+</div>
+```
+
+否则会抛出一个错误说 "Component template should contain exactly one root element..."。
+
+## 29. 父子组件如何通过事件通信？
+
+如果你想要子元素想父元素通信，在子元素中使用 `$emit` 发出一个事件给父组件，
+
+```javascript
+Vue.component('todo-tem', {
+props: ['todo'],
+template: `
+    <div class="todo-item">
+    <h3>{{ todo.title }}</h3>
+    <button v-on:click="$emit('increment-count', 1)">
+        Add
+    </button>
+    <div v-html="todo.description"></div>
+    </div>
+`
+})
+```
+
+现在你可以在父组件中使用这个 todo-item 接收 count 值。
+
+```html
+<ul v-for="todo in todos">
+    <li>
+        <todo-item
+        v-bind:key="todo.id"
+        v-bind:todo="todo" v-on:increment-count="total += 1"></todo-item>
+    </li>
+</ul>
+<span> Total todos count is {{total}}</span>
+```
+
+## 30. 怎样在自定义输入框组件上实现 model？
+
+自定义事件也能被用于创建与 v-model 一起使用的输入框。组件中的 `<input>` 必须遵守以下规则，
+
+1. 绑定 value 到一个 prop 值；
+2. input 时，使用新 value 发出自定义 input 事件；
+
+让我们以自定义输入框组件为例
+
+```javascript
+Vue.component('custom-input', {
+props: ['value'],
+template: `
+    <input
+    v-bind:value="value"
+    v-on:input="$emit('input', $event.target.value)"
+    >
+`
+})
+```
+
+现在你可以在这个组件上使用 `v-model`
+
+```html
+<custom-input v-model="searchInput"></custom-input>
+```

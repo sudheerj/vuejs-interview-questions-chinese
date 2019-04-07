@@ -40,6 +40,16 @@ Original English version: [vuejs-interview-questions](https://github.com/sudheer
 | 28   | [何时需要一个单独的根元素？](#28-何时需要一个单独的根元素)                                                       |
 | 29   | [父子组件如何通过事件通信？](#29-父子组件如何通过事件通信)                                                       |
 | 30   | [怎样在自定义输入框组件上实现 model？](#30-怎样在自定义输入框组件上实现-model)                                   |
+| 31   | [什么时 slots？](#31-什么时-slots)                                                                               |
+| 32   | [组件中的全局注册是什么？](#32-组件中的全局注册是什么)                                                           |
+| 33   | [为什么你需要本地注册？](#33-为什么你需要本地注册)                                                               |
+| 34   | [本地注册和全局注册在模块系统中有什么区别？](#34-本地注册和全局注册在模块系统中有什么区别)                       |
+| 35   | [什么是可接受的 prop 类型？](#35-什么是可接受的-prop-类型)                                                       |
+| 36   | [props 后面的数据流是什么？](#36-props-后面的数据流是什么)                                                       |
+| 37   | [什么是非 prop 属性？](#37-什么是非-prop-属性)                                                                   |
+| 38   | [props 有哪些可用的验证？](#38-props-有哪些可用的验证)                                                           |
+| 39   | [如何为组件自定义 model 指令？](#39-如何为组件自定义-model-指令)                                                 |
+| 40   | [提供给 transitions 什么可能的方式？](#30-提供给-transitions-什么可能的方式)                                     |
 
 ## 1. VueJS 是什么？
 
@@ -830,3 +840,298 @@ template: `
 ```html
 <custom-input v-model="searchInput"></custom-input>
 ```
+## 31. 什么时 slots？
+
+Vue 通过使用 <slot> 元素实现了一个内容分发 API。让我们创建一个带有插入内容 slot 的 alert 组件，
+
+```javascript
+Vue.component('alert', {
+template: `
+    <div class="alert-box">
+    <strong>Error!</strong>
+    <slot></slot>
+    </div>
+`
+})
+```
+
+现在你可以像下面这样动态插入内容，
+
+```javascript
+<alert>
+    There is an issue with in application.
+</alert>
+```
+
+## 32. 组件中的全局注册是什么？
+
+全局组件可以在任何注册后创建的 Vue 根实例（new Vue）的模板中使用。全局注册中，使用 Vue.component 创建组件，
+
+```javascript
+Vue.component('my-component-name', {
+// ... options ...
+})
+```
+
+选取多个 vue 实例中全局注册的组件，
+
+```javascript
+Vue.component('component-a', { /* ... */ })
+Vue.component('component-b', { /* ... */ })
+Vue.component('component-c', { /* ... */ })
+
+new Vue({ el: '#app' })
+```
+
+以上组件可以在 vue 实例中使用，
+
+```javascript
+<div id="app">
+    <component-a></component-a>
+    <component-b></component-b>
+    <component-c></component-c>
+</div>
+```
+
+组件也可以在子组件中使用。
+
+## 33. 为什么你需要本地注册？
+
+由于全局注册，即使你不使用该组件，也会包含在最终的构建中，这将成为程序中不必要的 JavaScript。这可以按以下步骤使用本地注册避免，
+
+1. 首先需要将组件定义为普通的 JavaScript 对象
+
+```javascript
+var ComponentA = { /* ... */ }
+var ComponentB = { /* ... */ }
+var ComponentC = { /* ... */ }
+```
+
+本地注册的组件不能再子组件中使用。这种情况下，你需要再组件部分添加他们
+
+```javascript
+var ComponentA = { /* ... */ }
+
+var ComponentB = {
+    components: {
+        'component-a': ComponentA
+    },
+// ...
+}
+```
+
+2. 你可以使用 vue 实例组件部分中的组件，
+
+```javascript
+new Vue({
+    el: '#app',
+    components: {
+        'component-a': ComponentA,
+        'component-b': ComponentB
+    }
+})
+```
+
+## 34. 本地注册和全局注册在模块系统中有什么区别？
+
+在**本地注册**，你需要在组建文件夹中创建每个组件并将它们导入到另一个组件文件的组件部分（components）。假设想要在组件 C 中注册组件 A 和组件 B，配置如下，
+
+```javascript
+import ComponentA from './ComponentA'
+import ComponentB from './ComponentC'
+
+export default {
+components: {
+    ComponentA,
+    ComponentB
+},
+// ...
+}
+```
+
+现在可以在组件 C 中的模板里使用组件 A 和组件 B。
+
+在**全局注册**中，你需要将全部公共或基础组件导出到一个单独的文件中。但是一些流行的打包工具如 `webpack` 通过使用 `require.context` 使得整个过程变得简单。
+
+```javascript
+import Vue from 'vue'
+import upperFirst from 'lodash/upperFirst'
+import camelCase from 'lodash/camelCase'
+
+const requireComponent = require.context(
+    // 组件文件夹的相对路径
+    './components',
+    // 是否在子文件夹中查找
+    false,
+    // 用于匹配基本组件文件名的正则表达式
+    /Base[A-Z]\w+\.(vue|js)$/
+)
+
+requireComponent.keys().forEach(fileName => {
+    // 获取组件配置
+    const componentConfig = requireComponent(fileName)
+
+    // 获取组件的 PascalCase 命名
+    const componentName = upperFirst(
+        camelCase(
+            // 删除文件名的前导 `./` 和扩展名
+            fileName.replace(/^\.\/(.*)\.\w+$/, '$1')
+        )
+    )
+
+    // 全局注册组件
+    Vue.component(
+        componentName,
+        // 在 `.default`上查找组件选项，如果组件是用 `.export default` 导出的，则会存在该选项，
+        // 否则会返回到模块的根目录。
+        componentConfig.default || componentConfig
+    )
+})
+```
+
+## 35. 什么是可接受的 prop 类型？
+
+你可以声明具有或不具有类型的 props。但建议使用 prop 类型，因为它给组件提供了文档，并会在开发者分配数据类型错误时发出警告。
+
+```javascript
+props: {
+    name: String,
+    age: Number,
+    isAuthenticated: Boolean,
+    phoneNumbers: Array,
+    address: Object
+}
+```
+
+如上述代码片段所述，你可以像一个对象一样列出 props，其中属性的名称和值分别是 prop 的名称和类型。
+
+## 36. props 后面的数据流是什么？
+
+所有的 props 在子属性和父属性之间遵循一个单向向下的绑定。也就是说，当父属性更新后会将最新的 prop 值传递给子，但不会有其他传递途径（子到父）。子组件不应该改变 prop 否则控制台会报错。
+可能的改变 prop 情况可以通过如下方式解决，
+
+1. 当你尝试使用父组件 prop 作为 子组件属性的初始值时：
+
+这种情况下你可以在子组件中定义一个本地属性并分配父组件的值作为初始值
+
+```javascript
+props: ['defaultUser'],
+data: function () {
+    return {
+        username: this.defaultUser
+    }
+}
+```
+
+2. 当你尝试转换父组件 prop 时：
+
+你可以定义一个计算属性来使用 prop 的值，
+
+```javascript
+props: ['environment'],
+computed: {
+    localEnvironment: function () {
+        return this.environment.trim().toUpperCase()
+    }
+}
+```
+
+## 37. 什么是非 prop 属性？
+
+非 prop 属性时传递给组件但未定义相应的 prop 的属性。
+例如，如果您使用的是第三方自定义输入组件 custom-input，该组件需要输入 `data-tooltip` 属性，则可以将此属性添加到组件实例中，
+
+```html
+<custom-input data-tooltip="Enter your input" />
+```
+
+如果你尝试从父组件传递 prop，子组件中同名的 props 将会被重写。但是 `class` 和 `style` 属性时例外，这些属性会和子组件的合并。
+
+```html
+<!-- Child component -->
+<input type="date" class="date-control">
+<!-- Parent component -->
+<custom-input class="custom-class" />
+```
+
+## 38. props 有哪些可用的验证？
+
+Vue 提供如类型、必要字段、默认值及自定义验证。你可以提供一个有验证需求的对象，属性值如下，
+
+以用户概况 user profile Vue 组件为例，其中包含合理的验证，
+
+```javascript
+Vue.component('user-profile', {
+    props: {
+        // 基本类型检查（ `null` 匹配任何类型）
+        age: Number,
+        // 多种可能的类型
+        identityNumber: [String, Number],
+        // 必要的 字符串
+        email: {
+            type: String,
+            required: true
+        },
+        // 具有默认值的数字
+        minBalance: {
+            type: Number,
+            default: 10000
+        },
+        // 具有默认值的对象
+        message: {
+            type: Object,
+            // 对象或数组默认值必须从工厂函数返回
+            default: function () {
+                return { message: 'Welcome to Vue' }
+            }
+        },
+        // 自定义验证方法
+        location: {
+            validator: function (value) {
+                // 该值必须与这些字符串之一匹配
+                return ['India', 'Singapore', 'Australia'].indexOf(value) !== -1
+            }
+        }
+    }
+})
+```
+
+## 39. 如何为组件自定义 model 指令？
+
+v-model 在组件上使用 **value** 作为 prop，**input** 作为 事件，但是一些 input 类型如 `checkboxes` 和 `radio buttons` 也许需要使用 value 属性给服务端。这种情况下最好自定义 model 属性。让我们以 checkbox 组件为例，
+
+```javascript
+Vue.component('custom-checkbox', {
+    model: {
+        prop: 'checked',
+        event: 'change'
+    },
+    props: {
+        checked: Boolean
+    },
+    template: `
+        <input
+        type="checkbox"
+        v-bind:checked="checked"
+        v-on:change="$emit('change', $event.target.checked)"
+        >
+    `
+})
+```
+
+现在你可以在这个自定义组件上使用 v-model 如下，
+
+```html
+<custom-checkbox v-model="selectFramework"></custom-checkbox>
+```
+
+selectFramework 属性将被传递给 checked prop ，并且当 checkbox 组件发出有新值的 change 事件时相同的属性将会更新。
+
+## 40. 提供给 transitions 什么可能的方式？
+
+在插入、更新或从 DOM 中删除项时，Vue 提供 transition 效果的方式有很多种。以下是可能的方式，
+
+1. 自动的 CSS transitions 和 animations 的应用类
+2. 集成第三方 CSS 动画库。如 Animate.css
+3. 在 transition 钩子期间使用 javascript 直接操作 DOM
+4. 集成第三方 JavaScript 动画库。如 Velocity.js

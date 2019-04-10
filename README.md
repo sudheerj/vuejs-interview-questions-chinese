@@ -49,7 +49,17 @@ Original English version: [vuejs-interview-questions](https://github.com/sudheer
 | 37   | [什么是非 prop 属性？](#37-什么是非-prop-属性)                                                                   |
 | 38   | [props 有哪些可用的验证？](#38-props-有哪些可用的验证)                                                           |
 | 39   | [如何为组件自定义 model 指令？](#39-如何为组件自定义-model-指令)                                                 |
-| 40   | [提供给 transitions 什么可能的方式？](#30-提供给-transitions-什么可能的方式)                                     |
+| 40   | [提供给 transitions 什么可能的方式？](#40-提供给-transitions-什么可能的方式)                                     |
+| 41   | [什么是 vue router 和它的特性？](#41-什么是-vue-router-和它的特性)                                               |
+| 42   | [使用 vue router 路由器的步骤是什么并给出一个例子？](#42-使用-vue-router-路由器的步骤是什么并给出一个例子)       |
+| 43   | [什么是动态路由匹配？](#43-什么是动态路由匹配)                                                                   |
+| 44   | [如何使路由参数的变化为响应式？](#44-如何使路由参数的变化为响应式)                                               |
+| 45   | [什么是路线匹配优先级？](#45-什么是路线匹配优先级)                                                               |
+| 46   | [什么是嵌套路由？](#46-什么是嵌套路由)                                                                           |
+| 47   | [什么是单文件组件？](#47-什么是单文件组件)                                                                       |
+| 48   | [单个文件组件是否违反了关注分离？](#48-单个文件组件是否违反了关注分离)                                           |
+| 49   | [单文件组件解决了哪些问题？](#49-单文件组件解决了哪些问题)                                                       |
+| 50   | [什么是过滤器？](#50-什么是过滤器)                                                                               |
 
 ## 1. VueJS 是什么？
 
@@ -1038,7 +1048,7 @@ computed: {
 
 ## 37. 什么是非 prop 属性？
 
-非 prop 属性时传递给组件但未定义相应的 prop 的属性。
+非 prop 属性是传递给组件但未定义相应的 prop 的属性。
 例如，如果您使用的是第三方自定义输入组件 custom-input，该组件需要输入 `data-tooltip` 属性，则可以将此属性添加到组件实例中，
 
 ```html
@@ -1135,3 +1145,256 @@ selectFramework 属性将被传递给 checked prop ，并且当 checkbox 组件�
 2. 集成第三方 CSS 动画库。如 Animate.css
 3. 在 transition 钩子期间使用 javascript 直接操作 DOM
 4. 集成第三方 JavaScript 动画库。如 Velocity.js
+
+## 41. 什么是 vue router 和它的特性？
+
+Vue Router 是一个为使用 Vue.js 框架设计单页应用的官方路由库。以下是它的特性，
+
+1. 嵌套路由 / 视图映射
+2. 模块化、基于组件的路由器配置
+3. 路由的 params, query, 通配符
+4. 基于 vue transition 系统的试图过渡效果
+5. 细粒度的导航控制
+6. 带有自动添加 CSS active class 名的链接
+7. HTML5 history 模式或 hash 模式, IE9 中自动回退
+8. history 模式时返回页面恢复滚动条位置
+
+## 42. 使用 vue router 路由器的步骤是什么并给出一个例子？
+
+在 vue 应用中集成 vue router 是非常容易的。让我们看个例子一步一步说明。
+
+**第一步：** 在模板中配置 router link 和 router view
+
+```html
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+
+<div id="app">
+    <h1>Welcome to Vue routing app!</h1>
+    <p>
+        <!-- 使用 router-link 组件和 to 属性进行导航。它会被渲染为一个 <a> 标签 -->
+        <router-link to="/home">Home</router-link>
+        <router-link to="/services">Services</router-link>
+    </p>
+    <!-- 路由匹配的组件将会展示在这个路由出口 -->
+    <router-view></router-view>
+</div>
+```
+
+**Step 2:** 引入 Vue 和 VueRouter 包并应用 router
+
+```javascript
+import Vue from 'vue';
+import VueRouter from 'vue-router';
+
+Vue.use(VueRouter)
+```
+
+**Step 3:** 定义或引入路由组件
+
+```javascript
+const Home = { template: '<div>Home</div>' }
+const Services = { template: '<div>Services</div>' }
+```
+
+**Step 4:** 定义每个路由和组件的映射
+
+```javascript
+const routes = [
+    { path: '/home', component: Home },
+    { path: '/services', component: Services }
+]
+```
+
+**Step 5:** 创建路由实例并传入 `routes` 选项
+
+```javascript
+const router = new VueRouter({
+    routes // short for `routes: routes`
+})
+```
+
+**Step 6:**  创建并挂载根实例
+
+```javascript
+const app = new Vue({
+    router
+}).$mount('#app')
+```
+
+现在你可以在这个 vue 应用中导航到不同的页面 (Home, Services) 了。
+
+## 43. 什么是动态路由匹配？
+
+有时可能会需要根据一个模式将路由映射到同一个组件。让我们用一个 user 组件，使用动态部分映射，url 如 `/user/john/post/123` 和 `/user/jack/post/235`，
+
+```javascript
+const User = {
+    template: '<div>User {{ $route.params.name }}, PostId: {{ route.params.postid }}</div>'
+}
+
+const router = new VueRouter({
+    routes: [
+        // 动态部分映射以冒号开始
+        { path: '/user/:name/post/:postid', component: User }
+    ]
+})
+```
+
+## 44. 如何使路由参数的变化为响应式？
+
+当您使用带有参数的路由从一个URL导航到另一个URL（用单个组件映射）时，相同的组件实例将被重用。
+尽管这样比销毁旧实例再创建个新的更高效，但组件的生命周期钩子函数不会被执行。
+这个问题可以使用以下任意一种方式解决，
+
+1. Watch $route 对象:
+
+```javascript
+const User = {
+    template: '<div>User {{ $route.params.name }} </div>',
+    watch: {
+        '$route' (to, from) {
+            // 响应 route 变化 ...
+        }
+    }
+}
+```
+
+2. 使用 beforeRouteUpdate 导航守卫（2.2 版本支持）
+
+```javascript
+const User = {
+    template: '<div>User {{ $route.params.name }} </div>',
+    beforeRouteUpdate (to, from, next) {
+        // 响应 route 变化并调用 next()
+    }
+}
+```
+
+beforeRouteEnter 导航守卫没有 `this` 权限。你可以通过将回掉函数传递给 `next` 访问 vm 实例。
+
+## 45. 什么是路线匹配优先级？
+
+有时 URL 可能会被多个路由匹配，这时路由匹配优先级用来解决路由匹配哪个组件的混淆问题。
+这个优先级是根据 routes 配置的顺序。换句话说，首先声明的路由具有更高的优先级。
+
+```javascript
+const router = new VueRouter({
+    routes: [
+        { path: '/user/:name', component: User } // 这个路由有更高的优先级
+        { path: '/user/:name', component: Admin }
+        { path: '/user/:name', component: Customer }
+    ]
+})
+```
+
+## 46. 什么是嵌套路由？
+
+通常来说，应用程序由嵌套的多层深度的组件组成。URL 的一部分对应了这些嵌套组件的一个确定结构。要将组件渲染在嵌套的出口，需要在 `VueRouter` 构造器配置中使用 `children` 选项。
+让我们看一个有各自路由的 profile 和 posts 组件组成的 user app。当没有匹配的嵌套路由时，你也可以定义一个默认路由。
+
+```javascript
+const router = new VueRouter({
+    routes: [{
+        path: '/user/:id',
+        component: User,
+        children: [
+            {
+                // 当匹配 /user/:id/profile 时 UserProfile 将渲染在 User's <router-view> 中
+                path: 'profile',
+                component: UserProfile
+            }, {
+                // 当匹配 /user/:id/posts 时 UserPosts 将渲染在 User's <router-view> 中
+                path: 'posts',
+                component: UserPosts
+            }, {
+                // 当匹配 /user/:id/ 时 UserHome 将渲染在 User's <router-view> 中
+                path: '',
+                component: UserHome
+            },
+        ]
+    }]
+})
+```
+
+## 47. 什么是单文件组件？
+
+单文件组件是一个容易理解的概念。你之前可能听说过应用程序的三个部分（HTML，JavaScript，CSS）都放在不同的文件中。但是单个文件组件将结构、样式和行为封装到一个文件中。一开始，在一个文件中包含这三个部分似乎很奇怪，但实际上它更有意义。
+让我们看一个单文件组件的例子
+
+```html
+<template>
+    <div>
+        <h1>Welcome {{ name }}!</h1>
+    </div>
+</template>
+
+<script>
+    module.exports = {
+        data: function() {
+            return {
+                name: 'John'
+            }
+        }
+    }
+</script>
+
+<style scoped>
+    h1 {
+        color: #34c779;
+        padding: 3px;
+    }
+</style>
+```
+
+## 48. 单个文件组件是否违反了关注分离？
+
+就最新的现代 UI 开发来说，关注分离并不等于文件类型分离。所以最好将代码基层划分为低耦合的组件并组合使用，而不是划分为很大的互相混杂的三层。
+通过将模板、逻辑、样式合并在一个组件中的这种方式使得单文件组件高内聚和更好的可维护性。
+你仍然可以通过热重载和预编译的功能坚持将 JavaScript 和 CSS 文件分离。例如，
+
+```html
+<template>
+    <div>This section will be pre-compiled and hot reloaded</div>
+</template>
+<script src="./my-component.js"></script>
+<style src="./my-component.css"></style>
+```
+
+## 49. 单文件组件解决了哪些问题？
+
+单文件组建解决了 .vue js 驱动应用中出现的常见问题。问题清单如下，
+
+1. 全局定义强制每个组件的唯一名称
+1. 字符串模板缺少语法高亮并且需要在多行 HTML 后加难看的斜线
+3. 不支持 CSS 意味着虽然 HTML 和 JavaScript 被模块化为组件，但 CSS 明显遗漏了
+4. 没有构建步骤限制我们使用 HTML 和 ES6
+
+## 50. 什么是过滤器？
+
+过滤器可用于应用普通的文本格式。过滤器应该加到 JavaScript 表达式的末尾，由“管道”（竖线）表示。你可以在两种特定情况下使用：
+
+1. mustache 插值（双花括号）
+2. v-bind 表达式
+
+例如，我们在组件的选项中定义一个名为 capitalize 的过滤器
+
+```javascript
+filters: {
+    capitalize: function (value) {
+        if (!value) return ''
+        value = value.toString()
+        return value.charAt(0).toUpperCase() + value.slice(1)
+    }
+}
+```
+
+现在你可以在 mustache 插值或 v-bind 表达式中使用 filter，
+
+```html
+<!-- in mustaches -->
+{{ username | capitalize }}
+
+<!-- in v-bind -->
+<div v-bind:id="username | capitalize"></div>
+```

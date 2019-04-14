@@ -60,6 +60,16 @@ Original English version: [vuejs-interview-questions](https://github.com/sudheer
 | 48   | [单个文件组件是否违反了关注分离？](#48-单个文件组件是否违反了关注分离)                                           |
 | 49   | [单文件组件解决了哪些问题？](#49-单文件组件解决了哪些问题)                                                       |
 | 50   | [什么是过滤器？](#50-什么是过滤器)                                                                               |
+| 51   | [创建过滤器有什么不同方法？](#51-创建过滤器有什么不同方法)                                                       |
+| 52   | [如何链接过滤器？](#52-如何链接过滤器)                                                                           |
+| 53   | [是否可以传递参数给过滤器？](#53-是否可以传递参数给过滤器)                                                       |
+| 54   | [什么是插件及它的各种服务？](#54-什么是插件及它的各种服务)                                                       |
+| 55   | [如何创建一个插件？](#55-如何创建一个插件)                                                                       |
+| 56   | [如何使用插件？](#56-如何使用插件)                                                                               |
+| 57   | [什么是混合？](#57-什么是混合)                                                                                   |
+| 58   | [什么是全局混合？](#58-什么是全局混合)                                                                           |
+| 59   | [如何在 CLI 中使用混合？](#59-如何在-CLI-中使用混合)                                                             |
+| 60   | [混合中的合并策略是什么？](#60-什么是过滤器)                                                                     |
 
 ## 1. VueJS 是什么？
 
@@ -1397,4 +1407,244 @@ filters: {
 
 <!-- in v-bind -->
 <div v-bind:id="username | capitalize"></div>
+```
+
+## 51. 创建过滤器有什么不同方法？
+
+您可以用两种方式定义过滤器，
+
+1. **局部过滤器**
+
+你可以在组件选项中定义局部过滤器。这种情况下，过滤器适用于特定组件。
+
+```javascript
+filters: {
+    capitalize: function (value) {
+        if (!value) return ''
+        value = value.toString()
+        return value.charAt(0).toUpperCase() + value.slice(1)
+    }
+}
+```
+
+2. **全局过滤器**
+
+还可以在创建 Vue 实例之前定义全局筛选器。在这种情况下，过滤器适用于 Vue 实例中所有组件，
+
+```javascript
+Vue.filter('capitalize', function (value) {
+    if (!value) return ''
+    value = value.toString()
+    return value.charAt(0).toUpperCase() + value.slice(1)
+})
+
+new Vue({
+    // ...
+})
+```
+
+## 52. 如何链接过滤器？
+
+可以一个接一个地链接过滤器，以对表达式执行多个操作。过滤链的一般结构如下：
+
+```javascript
+{{ message | filterA | filterB | filterB ... }}
+```
+
+在上面的链堆栈中，您可以观察到应用了三个过滤器的消息表达式，每个过滤器由管道（|）符号分隔。第一个过滤器（filter A）将表达式作为单个参数，表达式的结果将成为第二个过滤器（filter B）的参数，其余过滤器链将依次继续。
+例如，如果要将日期表达式转换为完整的日期格式并大写，则可以应用以下日期格式和大写过滤器，
+
+```javascript
+{{ birthday | dateFormat | uppercase }}
+```
+
+## 53. 是否可以传递参数给过滤器？
+
+是的，你可以传递参数给过滤器类似于一个 JavaScript 函数。过滤器参数的一般结构如下，
+
+```javascript
+{{ message | filterA('arg1', arg2) }}
+```
+
+这种情况下，filter A 将消息表达式作为第一个参数并将过滤器种提到的显式参数作为第二个和第三个参数。
+例如，你可以找到特定值的指数
+
+```javascript
+{{ 2 | exponentialStrength(10) }} // prints 2 power 10 = 1024
+```
+
+## 54. 什么是插件及它的各种服务？
+
+插件提供给 Vue 应用程序全局级的功能。插件提供各种服务，
+
+1. 添加一些全局方法或属性。例如，Vue 自定义元素
+2. 添加一个或多个全局资源（指令，过滤器，过渡）。例如 vue-touch
+3. 通过全局混合添加一些组件的选项。例如，vue-router
+4. 通过附加到 Vue.prototype 上添加一些 Vue 实例方法
+5. 一个提供自己的 API 的库，并同时注入一些上述的组合。例如，vue-router
+
+## 55. 如何创建一个插件？
+
+插件是通过暴露一个 `install` 方法创建的，该方法将 Vue 构造函数作为第一个参数和选项。VueJS 插件的格式如下，
+
+```javascript
+MyPlugin.install = function (Vue, options) {
+    // 1. 添加全局方法或属性
+    Vue.myGlobalMethod = function () {
+        // 一些逻辑 ...
+    }
+
+    // 2. 添加全局资源
+    Vue.directive('my-directive', {
+        bind (el, binding, vnode, oldVnode) {
+        // 一些逻辑 ...
+        }
+        ...
+    })
+
+    // 3. 注入组件选项
+    Vue.mixin({
+        created: function () {
+        // 一些逻辑 ...
+        }
+        ...
+    })
+
+    // 4. 添加实例的方法
+    Vue.prototype.$myMethod = function (methodOptions) {
+        // 一些逻辑 ...
+    }
+}
+```
+
+## 56. 如何使用插件？
+
+你可以通过 Vue 的 **use** 全局方法使用插件。你需要在你的应用程序调用 new Vue() 启动之前调用该方法。
+
+```javascript
+// 调用 `MyPlugin.install(Vue, { someOption: true })`
+Vue.use(MyPlugin)
+
+new Vue({
+    //... 选项
+})
+```
+
+## 57. 什么是混合？
+
+混合（Mixin）提供给我们一种在 Vue 组件种分发可重用功能的方式。这些可重用函数与已有函数合并。一个混合对象可以包含任何组件选项。让我们举一个有 `created` 生命周期的混合实例，它可以跨组件共享，
+
+```javascript
+const myMixin = {
+    created(){
+        console.log("Welcome to Mixins!")
+    }
+}
+var app = new Vue({
+    el: '#root',
+    mixins: [myMixin]
+})
+```
+
+**笔记：** 组件中可声明多个混合在混合数组种。
+
+## 58. 什么是全局混合？
+
+有时需要扩展 Vue 的功能或给应用程序种可用的所有组件应用一些选项。这种情况下，混合可以全局应用来影响 Vue 种的所有组件。这些混合叫作全局混合。让我们举一个全局混合的例子，
+
+```javascript
+Vue.mixin({
+    created(){
+        console.log("Write global mixins")
+    }
+})
+
+new Vue({
+    el: '#app'
+})
+```
+
+上面的全局混合种，混合的选项分布在所有组件种，console 在实例创建时运行。这些在测试调试或第三方库种很有用。同时，你需要尽少并小心使用全局混合，因为它会影响到创建的每个 Vue 实例包括第三方组件。
+
+## 59. 如何在 CLI 中使用混合？
+
+使用 Vue CLI，可以在项目文件夹中的任何位置指定混合，但最好在 `/src/mixins` 内指定，以便于访问。一旦在一个 `.js` 文件中创建了这些混合，并用 `export` 关键字进行了导出，就可以用 `import` 关键字及其文件路径将它们导入到任何组件中。
+
+## 60. 混合中的合并策略是什么？
+
+当混合和组件中包含有重叠选项时，将根据某些策略合并这些选项。
+
+1. data 对象进行递归合并，当有重叠冲突时组件 data 优先于混合。
+
+```javascript
+var mixin = {
+    data: function () {
+        return {
+            message: 'Hello, this is a Mixin'
+        }
+    }
+}
+new Vue({
+    mixins: [mixin],
+    data: function () {
+        return {
+            message: 'Hello, this is a Component'
+        }
+    },
+    created: function () {
+        console.log(this.$data); // => { message: "Hello, this is a Component'" }
+    }
+})
+```
+
+2. 重叠的钩子函数将被合并进一个数组以便都被调用。混合的钩子会优先于组件自己的钩子前调用。
+
+```javascript
+const myMixin = {
+    created(){
+        console.log("Called from Mixin")
+    }
+}
+
+new Vue({
+    el: '#root',
+    mixins:[myMixin],
+    created(){
+        console.log("Called from Component")
+    }
+})
+
+//Called from Mixin
+//Called from Component
+```
+
+3. 对象值的选项（如 methods，components，directives）将被合并进同一个对象中。这种情况下，对象中存在冲突的 keys 值时，组件的选项会更优先。
+
+```javascript
+var mixin = {
+    methods: {
+        firstName: function () {
+            console.log('John')
+        },
+        contact: function () {
+            console.log('+65 99898987')
+        }
+    }
+}
+
+var vm = new Vue({
+    mixins: [mixin],
+    methods: {
+        lastName: function () {
+            console.log('Murray')
+        },
+        contact: function () {
+            console.log('+91 893839389')
+        }
+    }
+})
+
+vm.firstName() // "John"
+vm.lastName() // "Murray"
+vm.contact() // "+91 893839389"
 ```

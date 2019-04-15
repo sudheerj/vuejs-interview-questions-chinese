@@ -69,7 +69,17 @@ Original English version: [vuejs-interview-questions](https://github.com/sudheer
 | 57   | [什么是混合？](#57-什么是混合)                                                                                   |
 | 58   | [什么是全局混合？](#58-什么是全局混合)                                                                           |
 | 59   | [如何在 CLI 中使用混合？](#59-如何在-CLI-中使用混合)                                                             |
-| 60   | [混合中的合并策略是什么？](#60-什么是过滤器)                                                                     |
+| 60   | [混合中的合并策略是什么？](#60-混合中的合并策略是什么)                                                           |
+| 61   | [什么是自定义选项合并策略？](#61-什么是自定义选项合并策略)                                                       |
+| 62   | [什么是自定义指令？](#62-什么是自定义指令)                                                                       |
+| 63   | [如何注册局部指令？](#63-如何注册局部指令)                                                                       |
+| 64   | [指令提供的钩子函数是什么？](#64-指令提供的钩子函数是什么)                                                       |
+| 65   | [指令钩子函数的参数是什么？](#65-指令钩子函数的参数是什么)                                                       |
+| 66   | [如何将多个值传递给一个指令？](#66-如何将多个值传递给一个指令)                                                   |
+| 67   | [什么是指令钩子中的函数速记？](#67-什么是指令钩子中的函数速记)                                                   |
+| 68   | [与模板相比 render 函数的好处是什么？](#68-与模板相比-render-函数的好处是什么)                                   |
+| 69   | [什么是 render 函数？](#69-什么是-render-函数)                                                                   |
+| 70   | [解释 createElement 的参数结构？](#70-解释-createElement-的参数结构)                                             |
 
 ## 1. VueJS 是什么？
 
@@ -1648,3 +1658,224 @@ vm.firstName() // "John"
 vm.lastName() // "Murray"
 vm.contact() // "+91 893839389"
 ```
+
+## 61. 什么是自定义选项合并策略？
+
+在合并自定义选项时 Vue 使用默认策略覆盖现有值。但是如果想要在合并选项时使用自定义选项则需要将函数附加到 `Vue.config.optionMergeStrategies` 上。
+例如，`myOptions` 自定义选项结构如下，
+
+```javascript
+Vue.config.optionMergeStrategies.myOption = function (toVal, fromVal) {
+    // 返回合并后的值
+}
+```
+
+下面是 Vuex 合并策略的高级示例，
+
+```javascript
+const merge = Vue.config.optionMergeStrategies.computed
+Vue.config.optionMergeStrategies.vuex = function (toVal, fromVal) {
+    if (!toVal) return fromVal
+    if (!fromVal) return toVal
+    return {
+        getters: merge(toVal.getters, fromVal.getters),
+        state: merge(toVal.state, fromVal.state),
+        actions: merge(toVal.actions, fromVal.actions)
+    }
+}
+```
+
+## 62. 什么是自定义指令？
+
+自定义指令是可以附加到 DOM 元素的小命令。它们以 v- 为前缀，以便让库知道您正在使用一个特殊的标记位，并保持语法的一致性。如果你需要对 HTML 元素进行低级的访问并有些行为控制，那么它将非常有用。让我们创建一个自定义 focus 指令，在页面加载时 focus 特殊的表单元素，
+
+```javascript
+// 注册全局自定义指令叫作 `v-focus`
+Vue.directive('focus', {
+    // 当绑定元素插入到DOM中时...
+    inserted: function (el) {
+        // 元素聚焦
+        el.focus()
+    }
+})
+```
+
+现在你可以像一下这样在任何元素上使用 v-focus 指令，
+
+```html
+<input v-focus>
+```
+
+## 63. 如何注册局部指令？
+
+你也可以注册局部指令，如下这样在组件中使用指令选项，
+
+```javascript
+directives: {
+    focus: {
+        // directive definition
+        inserted: function (el) {
+            el.focus()
+        }
+    }
+}
+```
+
+现在你可以像一下这样在任何元素上使用 v-focus 指令，
+
+```html
+<input v-focus>
+```
+
+## 64. 指令提供的钩子函数是什么？
+
+一个指令对象可以提供几个钩子函数，
+1. bind: 一旦指令附加到元素上，就会发生一次。
+2. inserted: 一旦元素插入到父 DOM 中，就会出现这个钩子。
+3. update: 当元素更新时调用这个钩子，但子元素尚未更新。
+4. componentUpdated: 一旦组件和子组件都被更新，这个钩子就被调用。
+5. unbind: 当移除指令时调用一次。
+
+**笔记：** 可以传递几个参数给上面的钩子。
+
+## 65. 指令钩子函数的参数是什么？
+
+所有钩子都有 `el`、`binding` 和 `vnode` 作为参数。除此之外，**update** 和 **componentupdated** 钩子还有 `oldvnode` ，以区分传递的旧值和新值。下面是传递给钩子的参数，
+1. `el`: 该指令绑定到的元素，可用于直接操作DOM。
+2. `binding`: 包含以下属性的对象。
+    1. `name`: 指令的名字，以 `v-` 作为前缀。
+    2. `value`: 传递给指令的值。 例如 `v-my-directive="1 + 1"` 值为 2。
+    3. `oldValue`: 上一个值，仅在更新和组件更新中可用。无论值是否已更改，它都可用。
+    4. `expression`: 字符串的绑定表达式。 例如 `v-my-directive="1 + 1"` 表达式为 "1 + 1"。
+    5. `arg`: 传递给指令的参数，例如 `v-my-directive:foo,` 参数为 "foo"。
+    6. `modifiers`: 包含修饰符的对象， 例如 `v-my-directive.foo.bar` 修饰符为 `{ foo: true, bar: true }`。
+3. `vnode`: 由 Vue 的编译器生成的虚拟节点。
+4. `oldVnode`: 上一个虚拟节点，仅在更新和组件更新挂钩中可用。
+
+参数通过以下钩子以图表形式展示，
+![custom-directives](https://github.com/sudheerj/vuejs-interview-questions-chinese/blob/master/images/custom-directives.svg)
+
+## 66. 如何将多个值传递给一个指令？
+
+指令可以采用任何有效的 javascript 表达式。因此，如果您想传递多个值，那么可以传递一个 javascript 对象文本。
+让我们将对象字面量传递给 avatar 指令，如下所示
+
+```html
+<div v-avatar="{ width: 500, height: 400, url: 'path/logo', text: 'Iron Man' }"></div>
+```
+
+现在让我们全局配置 avatar 指令，
+
+```javascript
+Vue.directive('avatar', function (el, binding) {
+    console.log(binding.value.width) // 500
+    console.log(binding.value.height)  // 400
+    console.log(binding.value.url) // path/logo
+    console.log(binding.value.text)  // "Iron Man"
+})
+```
+
+## 67. 什么是指令钩子中的函数速记？
+
+在少数情况下，您可能希望在 `bind` 和 `update` 钩子上使用相同的行为，而不考虑其他钩子。在这种情况下，您可以使用函数速记，
+
+```javascript
+Vue.directive('theme-switcher', function (el, binding) {
+    el.style.backgroundColor = binding.value
+})
+```
+
+## 68. 与模板相比 render 函数的好处是什么？
+
+在 Vuejs 中，模板非常强大，建议将 HTML 作为应用程序的一部分进行构建。但是，一些特殊情况，如基于输入或插槽值的动态组件创建，可以通过渲染函数实现。此外，这些功能还提供了 JavaScript 生态系统的全部功能。
+
+## 69. 什么是 render 函数？
+
+render 函数是一个普通函数，它接收 `createElement` 方法作为用于创建虚拟节点的第一个参数。在内部，Vue.js 的模板实际上在构建时编译为 render 函数。因此，模板只是 render 函数的语法糖。让我们以简单的 DIV 标记和相应的 render 函数为例，
+HTML 标记可以写在模板标记中，如下所示：
+
+```html
+<template>
+    <div :class="{'is-rounded': isRounded}">
+    <p>Welcome to Vue render functions</p>
+    </div>
+</template>
+```
+
+编译后的或显式的 render 函数如下所示：
+
+```javascript
+render: function (createElement) {
+    return createElement('div', {
+        'class': {
+            'is-rounded': this.isRounded
+        }
+    }, [
+        createElement('p', 'Welcome to Vue render functions')
+    ]);
+},
+```
+
+**笔记：** react 组件是用 JSX 中的 render 函数构建的。
+
+## 70. 解释 createElement 的参数结构？
+
+CreateElement 接受很少的参数来使用所有模板功能。让我们看看 CreateElement 的基本结构和可用的参数，
+
+```javascript
+// @returns {VNode}
+createElement(
+    // 将 HTML 标签名、组件选项或异步函数解析为其中之一。
+    // 类型是 {String | Object | Function}
+    // 必选
+    'div',
+
+    // 与模板中要使用的属性相对应的数据对象。
+    // 类型是 {Object}
+    // 可选
+    {
+        // 普通 HTML 属性
+        attrs: {
+            id: 'someId'
+        },
+        // 组件 props
+        props: {
+            myProp: 'somePropValue'
+        },
+        // DOM 属性
+        domProps: {
+            innerHTML: 'This is some text'
+        },
+        // 事件处理嵌在 `on` 属性中
+        on: {
+            click: this.clickHandler
+        },
+        // 类似于 `v-bind:style`，接受字符串、对象或数组。
+        style: {
+            color: 'red',
+            fontSize: '14px'
+        },
+        // 类似于 `v-bind:class`，接受字符串、对象或字符串和对象数组。
+        class: {
+            classsName1: true,
+            classsName2: false
+        },
+        ....
+    },
+
+    // 子虚拟节点，使用 `createElement()` 构建, 或者使用字符串获取 'text VNodes'.
+    // 类型是 {String | Array}
+    // 可选的
+    [
+        'Learn about createElement arguments.',
+        createElement('h1', 'Headline as a child virtual node'),
+        createElement(MyComponent, {
+            props: {
+                someProp: 'This is a prop value'
+            }
+        })
+    ]
+)
+```
+
+date 对象详情见官方 [doc](https://vuejs.org/v2/guide/render-function.html#The-Data-Object-In-Depth).

@@ -80,6 +80,16 @@ Original English version: [vuejs-interview-questions](https://github.com/sudheer
 | 68   | [与模板相比 render 函数的好处是什么？](#68-与模板相比-render-函数的好处是什么)                                   |
 | 69   | [什么是 render 函数？](#69-什么是-render-函数)                                                                   |
 | 70   | [解释 createElement 的参数结构？](#70-解释-createElement-的参数结构)                                             |
+| 71   | [如何在组件中重复虚拟节点？](#71-如何在组件中重复虚拟节点)                                                       |
+| 72   | [列出 render 函数中与模板等效的项？](#72-列出-render-函数中与模板等效的项)                                       |
+| 73   | [什么是功能组件？](#73-什么是功能组件)                                                                           |
+| 74   | [VueJS 和 ReactJS 有什么相似之处？](#74-VueJS-和-ReactJS-有什么相似之处)                                         |
+| 75   | [VueJS 和 ReactJS 有什么不同之处？](#75-VueJS-和-ReactJS-有什么不同之处)                                         |
+| 76   | [VueJS 与 ReactJS 相比有什么优势？](#76-VueJS-与-ReactJS-相比有什么优势)                                         |
+| 77   | [ReactJS 与 VueJS 相比有什么优势？](#77-ReactJS-与-VueJS-相比有什么优势)                                         |
+| 78   | [VueJS 和 AngularJS 有什么不同之处？](#78-VueJS-和-AngularJS-有什么不同之处)                                     |
+| 79   | [什么是动态组件？](#79-什么是动态组件)                                                                           |
+| 80   | [keep alive 标签的目的是什么？](#80-keep-alive-标签的目的是什么)                                                 |
 
 ## 1. VueJS 是什么？
 
@@ -1753,6 +1763,7 @@ directives: {
 4. `oldVnode`: 上一个虚拟节点，仅在更新和组件更新挂钩中可用。
 
 参数通过以下钩子以图表形式展示，
+
 ![custom-directives](https://github.com/sudheerj/vuejs-interview-questions-chinese/blob/master/images/custom-directives.svg)
 
 ## 66. 如何将多个值传递给一个指令？
@@ -1878,4 +1889,181 @@ createElement(
 )
 ```
 
-date 对象详情见官方 [doc](https://vuejs.org/v2/guide/render-function.html#The-Data-Object-In-Depth).
+data 对象详情见官方 [doc](https://vuejs.org/v2/guide/render-function.html#The-Data-Object-In-Depth)
+
+## 71. 如何在组件中重复虚拟节点？
+
+组件树中的所有虚拟节点（Vnodes）都必须是唯一的，也就是说，不能直接写入重复的节点。如果要多次复制同一个元素/组件，则应使用工厂函数。
+下面的呈现函数在尝试复制h1元素3次时无效，
+下面的 render 函数尝试3次复制 h1 元素无效，
+
+```javascript
+render: function (createElement) {
+    var myHeadingVNode = createElement('h1', 'This is a Virtual Node')
+    return createElement('div', [
+        myHeadingVNode, myHeadingVNode, myHeadingVNode
+    ])
+}
+```
+
+你可以通过工厂函数进行复制，
+
+```javascript
+render: function (createElement) {
+    return createElement('div',
+        Array.apply(null, { length: 3 }).map(function () {
+            return createElement('h1', 'This is a Virtual Node')
+        })
+    )
+}
+```
+
+## 72. 列出 render 函数中与模板等效的项？
+
+VueJS 为模板功能提供了专有的替代方案和简单的 JavaScript 用法。让我们把它们列在一张表格里比较一下，
+
+| 模板                                           | Render 函数                                               |
+|------------------------------------------------|-----------------------------------------------------------|
+| 条件和循环指令：v-if 和 v-for                  | 使用 JS 的 if/else 和映射概念                             |
+| 双向绑定：v-model                              | 使用值绑定和事件绑定应用自己的 JS 逻辑                    |
+| 捕获事件修饰符：.passive、.capture、.once      | &, !, ~                                                   |
+| 捕获事件修饰符：.capture.once 或 .once.capture | ~!                                                        |
+| 事件修饰符：.stop                              | event.stopPropagation()                                   |
+| 事件修饰符：.prevent                           | event.preventDefault()                                    |
+| 事件修饰符：.self                              | if (event.target !== event.currentTarget) return          |
+| 键修饰符：.enter, .13                          | if (event.keyCode !== 13) return                          |
+| 修饰符键：.ctrl, .alt, .shift, .meta           | if (!event.ctrlKey) return                                |
+| slot 属性                                      | render 函数提供 this.$slots 和 this.$scopedSlots 实例属性 |
+
+## 73. 什么是功能组件？
+
+功能组件只是简单的函数，通过传递上下文来创建简单的组件。每个功能组件都遵循两条规则，
+1. **无状态:** 它本身不保持任何状态
+2. **无实例:** 它没有实例，因此没有 this
+
+您需要定义 `functional:true` 才能使其正常工作。让我们以功能组件为例，
+
+```javascript
+Vue.component('my-component', {
+    functional: true,
+    // Props 是可选的
+    props: {
+        // ...
+    },
+    // 为了弥补缺少的实例，
+    // 提供了第二个上下文参数
+    render: function (createElement, context) {
+        // ...
+    }
+})
+```
+
+**笔记:** 功能组件在 React 社区中也非常流行。
+
+## 74. VueJS 和 ReactJS 有什么相似之处？
+
+Even though ReactJS and VueJS are two different frameworks there are few similarities(apart from the common goal of utilized in interface design) between them.
+1. Both frameworks are based on the **Virtual DOM** model
+2. They provide features such Component-based structure and reactivity
+3. They are intended for working with the root library, while all the additional tasks are transferred to other libraries(routing, state management etc).
+
+## 75. VueJS 和 ReactJS 有什么不同之处？
+
+尽管 VueJS 和 ReactJS 有一些功能共享，但也有一些不同，以表格的形式列出。
+
+| 功能         | VueJS                          | ReactJS                        |
+|--------------|--------------------------------|--------------------------------|
+| 类型         | JavaScript MVC 框架            | JavaScript 库                  |
+| 平台         | 主要关注 Web 开发              | Web 和 原生                    |
+| 学习曲线     | 陡峭的学习曲线并且需要深入知识 | 陡峭的学习曲线并且需要深入知识 |
+| 简单性       | Vue 比 React 更简单            | React 比 Vue 更复杂            |
+| 引导应用程序 | Vue-cli                        | CRA (Create React App)         |
+
+## 76. VueJS 与 ReactJS 相比有什么优势？
+
+与 React 相比，Vue 具有以下优势
+1. Vue 更小且更快
+2. 方便的模板简化了开发过程
+3. 相比学习 JSX 它有更简单的 JavaScript 语法
+
+## 77. ReactJS 与 VueJS 相比有什么优势？
+
+与 Vue 相比，React 具有以下优势
+1. ReactJS 在大型应用程序开发中提供了更大的灵活性
+2. 易于测试
+3. 非常适合创建移动应用程序
+4. 生态系统规模大，成熟度高
+
+## 78. VueJS 和 AngularJS 有什么不同之处？
+
+Vue 和 Angular 的语法在某些地方很常见，因为 Angular 是 Vuejs 开发的基础。但是 Vuejs 和 Angular 之间也有很多不同之处，
+
+| 功能     | VueJS                          | AngularJS                                                |
+|----------|--------------------------------|----------------------------------------------------------|
+| 复杂度   | 易于学习，简单的 API 和设计    | 这个框架有点庞大，需要一些 typescript 等方面的学习曲线。 |
+| 数据绑定 | 单向绑定                       | 双向绑定                                                 |
+| 学习曲线 | 陡峭的学习曲线并且需要深入知识 | 陡峭的学习曲线并且需要深入知识                           |
+| 创办者   | 由前谷歌员工创建               | 由谷歌提供支持                                           |
+| 初版本   | 2014年2月                      | 2016年9月                                                |
+| 模型     | 基于虚拟 DOM（文档对象模型）   | 基于MVC（模型-视图-控制器）                              |
+| 编写     | JavaScript                     | TypeScript                                               |
+
+## 79. 什么是动态组件？
+
+动态组件用于使用 **<component>** 元素在多个组件之间动态切换，并将数据传递给 v-bind:is 属性。
+让我们创建一个动态组件来在网站的不同页面之间切换，
+
+```javascript
+new Vue({
+    el: '#app',
+    data: {
+        currentPage: 'home'
+    },
+    components: {
+        home: {
+            template: "<p>Home</p>"
+        },
+        about: {
+            template: "<p>About</p>"
+        },
+        contact: {
+            template: "<p>Contact</p>"
+        }
+    }
+})
+```
+
+现在你可以在当前页面使用动态组件
+
+```html
+<div id="app">
+    <component v-bind:is="currentPage">
+        <!-- 当 currentPage 改变时 component 也会改变 -->
+        <!-- output: Home -->
+    </component>
+</div>
+```
+
+## 80. keep alive 标签的目的是什么？
+
+Keep-Alive标记是一个抽象组件，用于保留组件状态或避免重新呈现。当您将 `<keep-alive>` 标签包装在动态组件上时，它会缓存不活动的组件实例，而不会破坏它们。
+让我们看看它的示例用法，
+
+```javascript
+<!-- 将缓存非活动组件 -->
+<keep-alive>
+    <component v-bind:is="currentTabComponent"></component>
+</keep-alive>
+```
+
+当存在多个条件子级时，要求一次只渲染一个子级。
+
+```javascript
+<!-- 多个条件子级 -->
+<keep-alive>
+    <comp-a v-if="a > 1"></comp-a>
+    <comp-b v-else></comp-b>
+</keep-alive>
+```
+
+**笔记:** keep-alive 标签不会渲染出一个 DOM 元素，也不会显示在组件父链中。

@@ -100,6 +100,16 @@ Original English version: [vuejs-interview-questions](https://github.com/sudheer
 | 88   | [full 和 runtime-only 之间在构建时的区别时什么？](#88-full-和-runtime-only-之间在构建时的区别时什么)             |
 | 89   | [列出不同的 VueJS 构建类型？](#89-列出不同的-VueJS-构建类型)                                                     |
 | 90   | [如何在 webpack 中配置 VueJS？](#90-如何在-webpack-中配置-VueJS)                                                 |
+| 91   | [VueJS 编译器的用途是什么？](#91-VueJS-编译器的用途是什么)                                                       |
+| 92   | [Dev Tools 及其用途是什么？](#92-Dev-Tools-及其用途是什么)                                                       |
+| 93   | [VueJS 的浏览器支持是什么？](#93-VueJS-的浏览器支持是什么)                                                       |
+| 94   | [如何使用各种 CDN？](#94-如何使用各种-CDN)                                                                       |
+| 95   | [如何强制更新？](#95-如何强制更新)                                                                               |
+| 96   | [VueJS 的 once 指令时什么用途？](#96-VueJS-的-once-指令时什么用途)                                               |
+| 97   | [如何访问根实例？](#97-如何访问根实例)                                                                           |
+| 98   | [VueJS 的十大组织？](#88-VueJS-的十大组织)                                                                       |
+| 99   | [renderError 的用途是什么？](#99-renderError-的用途是什么)                                                       |
+| 100  | [如何访问父实例？](#100-如何访问父实例)                                                                          |
 
 ## 1. VueJS 是什么？
 
@@ -2233,3 +2243,153 @@ module.exports = {
     }
 }
 ```
+
+## 91. VueJS 编译器的用途是什么？
+
+编译器负责将模板字符串编译成 JavaScript render 函数。例如，以下代码段展示了需要编译和不需要编译的模板之前的差异，
+
+```javascript
+// 需要编译器
+new Vue({
+    template: '<div>{{ message }}</div>'
+})
+
+// 不需要编译器
+new Vue({
+    render (h) {
+        return h('div', this.message)
+    }
+})
+```
+
+## 92. Dev Tools 及其用途是什么？
+
+DevTools 是一个浏览器扩展插件，允许你在更加友好的用户界面检查和调试你的 Vue 应用。你可以找到以下针对不同浏览器或环境的扩展，
+1. Chrome Extension
+2. Firefox Addon
+3. Standalone Electron app (可在任何环境中工作)
+
+DevTools 的使用快照如下图所示
+
+![custom-directives](https://github.com/sudheerj/vuejs-interview-questions-chinese/blob/master/images/DevTools.png)
+
+**注意：**
+1. 如果页面使用了生产环境压缩构建后的 Vue.js，默认会禁用 DevTools 检查，因此不会显示 Vue 的界面。
+2. 为了使其可以通过 `file://` 协议工作，你需要在 Chrome 扩展管理面板中检查，需要为该插件选择 Allow access to file URLs。
+
+## 93. VueJS 的浏览器支持是什么？
+
+它支持这个 [url](https://caniuse.com/#feat=es5) 中提到的所有的 ECMAScript5 浏览器。VueJS 不支持 IE8 及以下浏览器，因为它使用的 ECMAScript5 特性在 IE8 中底层 JS 引擎不支持。
+
+## 94. 如何使用各种 CDN？
+
+在 jsdelivr、unpkg 及 cdnjs etc CDNs 中都可以或得到 VueJS。
+通常你可以将他们用以原型开发或学习的目的。例如你可以使用如下方式通过 jsdelivr 使用最新版 Vue
+
+```javascript
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.7/dist/vue.js"></script>
+```
+
+如下所示，你可以通过原生 ES modules 的方式使用，
+
+```html
+<script type="module">
+import Vue from 'https://cdn.jsdelivr.net/npm/vue@2.6.7/dist/vue.esm.browser.js'
+</script>
+```
+
+**注意：** 你可以移除版本号获取最新版本。
+
+## 95. 如何强制更新？
+
+尽管事实上没有被动的数据发生变化，手动强制更新这种情况使极为罕见的。即，强制手动重新渲染 Vue 实例。你可以使用 **vm.$forceUpdate()** API 方法强制更新。
+
+**注意：**  他不影响所有子组件，仅影响实例本身和有插入 slot 内容的子组件。
+
+## 96. VueJS 的 once 指令时什么用途？
+
+如果你想要渲染大量静态内容，你需要确保它们仅计算一次并缓存下来。这种情况下你可以使用 `v-once` 指令进行根级别包装。v-once 指令示例用法如下，
+
+```javascript
+Vue.component('legal-terms', {
+    template: `
+        <div v-once>
+        <h1>Legal Terms</h1>
+        ... 大量静态内容 ...
+        </div>
+    `
+})
+```
+
+**注意：** 建议不要过度使用，除非由于大量静态内容导致渲染过慢。
+
+## 97. 如何访问根实例？
+
+可以使用 `$root` 属性访问根实例 new Vue()。让我们通过一个例子来看用法。首先让我们创建一个有如下属性和方法的根实例，
+
+```javascript
+// Vue 根实例
+new Vue({
+    data: {
+        age: 26
+    },
+    computed: {
+        fullName: function () { /* ... */ }
+    },
+    methods: {
+        interest: function () { /* ... */ }
+    }
+})
+```
+
+现在你可以访问根实例的数据和方法，如下所示，
+
+```javascript
+// 获取根数据
+this.$root.age
+
+// 设置根数据
+this.$root.age = 29
+
+// 访问根计算属性
+this.$root.fullName
+
+// 调用根方法
+this.$root.interest()
+```
+
+建议使用 Vuex 来管理状态，而不是用根实例作为全局存储。
+
+## 98. VueJS 的十大组织？
+
+以下是使用 VueJS 开发应用产品的十大组织，
+
+1. Facebook - Used on marketing side of its Newsfeed
+2. Netflix - Used in two internal apps for building movie streaming interfaces
+3. Adobe -  Used for Portfolio, a custom website builder designed to help users showcase their creative work
+4. Xiaomi - Used for products where it sells from consumer electronics to software
+5. Alibaba - Provide their apps an excellent experience to its customers
+6. WizzAir - A budget airline WizzAir used for their customers user interface
+7. EuroNews
+8. Laracasts
+9. GitLab
+10. Laracasts
+
+## 99. renderError 的用途是什么？
+
+当默认 render 函数遇到错误，你可以使用 renderError 作为 render 输出的替代。error 将会作为第二个参数传递给 renderError。下面是 renderError 的使用示例，
+
+```javascript
+new Vue({
+    render (h) {
+        throw new Error('An error')
+    },
+    renderError (h, err) {
+        return h('div', { style: { color: 'red' }}, err.stack)
+    }
+}).$mount('#app')
+``` 
+
+## 100. 如何访问父实例？
+
+`$parent` 引用了 **直接外部作用域**。子组件可以通过 `this.$parent` 访问父组件，子组件将被推入父组件的 $children 数组。这将在父子实例之间建立一个父子关系。你可以类似 $root 去访问父组件的数据和属性。

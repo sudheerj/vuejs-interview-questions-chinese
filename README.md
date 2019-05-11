@@ -107,9 +107,19 @@ Original English version: [vuejs-interview-questions](https://github.com/sudheer
 | 95   | [如何强制更新？](#95-如何强制更新)                                                                               |
 | 96   | [VueJS 的 once 指令时什么用途？](#96-VueJS-的-once-指令时什么用途)                                               |
 | 97   | [如何访问根实例？](#97-如何访问根实例)                                                                           |
-| 98   | [VueJS 的十大组织？](#88-VueJS-的十大组织)                                                                       |
+| 98   | [VueJS 的十大组织？](#98-VueJS-的十大组织)                                                                       |
 | 99   | [renderError 的用途是什么？](#99-renderError-的用途是什么)                                                       |
 | 100  | [如何访问父实例？](#100-如何访问父实例)                                                                          |
+| 101  | [什么是 Vuex？](#101-什么是-Vuex)                                                                                |
+| 102  | [状态管理模式的主要组成部分是什么？](#102-状态管理模式的主要组成部分是什么)                                      |
+| 103  | [如何在 Vuex 中表示单向数据流？](#103-如何在-Vuex-中表示单向数据流)                                              |
+| 104  | [什么是 vue loader？](#104-什么是-vue-loader)                                                                    |
+| 105  | [如何在 webpack 中配置 vue loader？](#105-如何在-webpack-中配置-vue-loader)                                      |
+| 106  | [什么是 asset url 转换规则？](#106-什么是-asset-url-转换规则)                                                    |
+| 107  | [如何使用 vue loader 处理预处理器？](#107-如何使用-vue-loader-处理预处理器)                                      |
+| 108  | [什么是 CSS 作用域？](#108-什么是-CSS-作用域)                                                                    |
+| 109  | [是否可能将 local 和 global styles 混在一起？](#109-是否可能将-local-和-global-styles-混在一起)                  |
+| 110  | [如何使用 deep 选择器？](#110-如何使用-deep-选择器)                                                              |
 
 ## 1. VueJS 是什么？
 
@@ -2271,7 +2281,7 @@ DevTools 是一个浏览器扩展插件，允许你在更加友好的用户界�
 
 DevTools 的使用快照如下图所示
 
-![custom-directives](https://github.com/sudheerj/vuejs-interview-questions-chinese/blob/master/images/DevTools.png)
+![DevTools](https://github.com/sudheerj/vuejs-interview-questions-chinese/blob/master/images/DevTools.png)
 
 **注意：**
 1. 如果页面使用了生产环境压缩构建后的 Vue.js，默认会禁用 DevTools 检查，因此不会显示 Vue 的界面。
@@ -2393,3 +2403,186 @@ new Vue({
 ## 100. 如何访问父实例？
 
 `$parent` 引用了 **直接外部作用域**。子组件可以通过 `this.$parent` 访问父组件，子组件将被推入父组件的 $children 数组。这将在父子实例之间建立一个父子关系。你可以类似 $root 去访问父组件的数据和属性。
+
+## 101. 什么是 Vuex？
+
+Vuex 是一个针对于 Vue.js 的状态管理模式 + 库（Flux-inspired 应用架构）。它作为应用中所有组件的集中存储，通过规则确保状态只能以可预测的方式改变。
+
+## 102. 状态管理模式的主要组成部分是什么？
+
+状态管理模式的主要组成部分是状态 state、视图 view、行为 action。应用程序中这些部分遵循的模式就是状态管理模式。以下是组成部分的细节，
+
+1. **state** 驱动我们应用程序的源
+2. **view** state 的映射
+3. **action** 是状态可能改变的可能方式，以对来自 view 的用户输入作出反应
+
+举一个遵循上述三条的状态管理模式的例子
+
+```javascript
+new Vue({
+    // state
+    data () {
+        return {
+            count: 0
+        }
+    },
+    // view
+    template: `
+        <div>{{ count }}</div>
+    `,
+    // actions
+    methods: {
+        increment () {
+            this.count++
+        }
+    }
+})
+```
+
+## 103. 如何在 Vuex 中表示单向数据流？
+
+VueJS 通过 props 属性提供了一个单项数据流模型，同样的概念也体现在如下的 Vuex 中，
+
+![flow](https://github.com/sudheerj/vuejs-interview-questions-chinese/blob/master/images/flow.png)
+
+## 104. 什么是 vue loader？
+
+Vue loader 是一个 webpack 的 loader，允许以单文件组件格式 SFCs 创作 Vue 组件，
+Vue loader is a loader for webpack that allows you to author Vue components in a format called Single-File Components (Single-File Components SFC) 下例是一个 SFC 的 HelloWorld 组件
+
+```javascript
+<template>
+    <div class="greeting">{{ message }}</div>
+</template>
+
+<script>
+export default {
+    data () {
+        return {
+            message: 'Hello world for vueloader!'
+        }
+    }
+}
+</script>
+
+<style>
+.greeting {
+    color: blue;
+}
+</style>
+```
+
+## 105. 如何在 webpack 中配置 vue loader？
+
+Vue loader 的配置与其他 loader 有一些不同，在 webpack 配置中还需要添加 Vue loader 的插件用于获取并拷贝任何其他已经定义的 rules 应用于 `.vue` 文件中响应的语言块 `<script> <style>` 中。
+
+vue loader 的 webpack 配置简单演示如下，
+
+```javascript
+// webpack.config.js
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
+
+module.exports = {
+    mode: 'development',
+    module: {
+        rules: [
+        {
+            test: /\.vue$/,
+            loader: 'vue-loader'
+        },
+        // this will apply to both plain `.js` files and `<script>` blocks in `.vue` files
+        {
+            test: /\.js$/,
+            loader: 'babel-loader'
+        },
+        // this will apply to both plain `.css` files and `<style>` blocks in `.vue` files
+        {
+            test: /\.css$/,
+            use: [
+            'vue-style-loader',
+            'css-loader'
+            ]
+        }
+        ]
+    },
+    plugins: [
+        // make sure to include the plugin for cloning and mapping them to respective language blocks
+        new VueLoaderPlugin()
+    ]
+}
+```
+
+## 106. 什么是 asset url 转换规则？
+
+下面是 Asset URL 的转换规则
+
+1. **绝对路径**：如果 URL 是绝对路径（如 `/images/loader.png`）则会保持原样。
+2. **相对路径**：如果 URL 是以 `.` 开头（如 ./images/loader.png）则会被解释为相对模块请求，并基于文件系统的文件夹结构进行解析。
+3. **URL 以 ~ 开头**：会将其解释为模块请求，这种方式可以用来引用 node module 中的资源。
+4. **URL 以 @ 开头**：会将其解释为模块请求，如果 webpack 的 resolve 配置中有 `@` 的别名配置，默认该别名指向 `/src` 路径。
+
+## 107. 如何使用 vue loader 处理预处理器？
+
+`vue loader` 会根据语言块的 lang 属性和 webpack 配置中的定义的 rules 自动推断要使用的 loader。使用 vue loader 时你可以使用 SASS、LESS、Stylus 和 PostCSS。
+
+## 108. 什么是 CSS 作用域？
+
+css 作用域是 vue 单文件组件中的一种机制，以避免样式从当前组件中泄露并影响页面中其他意想不到的组件。例如当一个 `<style>` 标签有 scoped 属性时，它的 css 将只应用于当前组件中的元素。它使用了 PostCSS 将有作用域的 CSS 转换为普通 CSS。举一个 CSS 作用域的例子，
+
+```javascript
+<style scoped>
+.greeting {
+    color: green;
+}
+</style>
+
+<template>
+    <div class="greeting">Let's start Scoped CSS</div>
+</template>
+```
+
+上面的代码将会被转化为普通 CSS 如下
+
+```javascript
+<style scoped>
+.greeting[data-v-f3f3eg9] {
+    color: green;
+}
+</style>
+
+<template>
+    <div class="greeting" data-v-f3f3eg9>Let's start Scoped CSS</div>
+</template>
+```
+
+## 109. 是否可能将 local 和 global styles 混在一起？
+
+是的，你可以在同一组件中包含 作用域样式 和 非作用域样式。如果不标注 scoped 属性则就会成为全局样式。
+
+```javascript
+<style>
+/* global styles */
+</style>
+
+<style scoped>
+/* local styles */
+</style>
+```
+
+## 110. 如何使用 deep 选择器？
+
+在作用域样式中，如果你需要 deep 选择器修改子组件的样式，则需要使用 **>>>** 组合。
+
+```javascript
+<style scoped>
+.class1 >>> .class2 { /* ... */ }
+</style>
+```
+
+它将被转化为，
+
+```javascript
+.class1[data-v-f3f3eg9] .class2 { /* ... */ }
+```
+
+**注意:** 如果使用 SASS 预处理器时 **>>>** 可能无法正确处理，这种情况下可以使用 `/deep/` 或 `::v-deep` 代替 `>>>`

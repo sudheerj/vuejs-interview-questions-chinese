@@ -130,6 +130,16 @@ Original English version: [vuejs-interview-questions](https://github.com/sudheer
 | 118  | [什么是 vue loader 中的热重载？](#118-什么是-vue-loader-中的热重载)                                              |
 | 119  | [热重载的默认行为是什么？](#119-热重载的默认行为是什么)                                                          |
 | 120  | [如何显式禁用热重载？](#120-如何显式禁用热重载)                                                                  |
+| 121  | [如何使用热重载？](#121-如何使用热重载)                                                                          |
+| 122  | [什么是热重载中的状态保存规则？](#122-什么是热重载中的状态保存规则)                                              |
+| 123  | [如何使用 vue-loader 创建函数组件？](#123-如何使用-vue-loader-创建函数组件)                                      |
+| 124  | [如何在函数组件中访问全局属性？](#124-如何在函数组件中访问全局属性)                                              |
+| 125  | [如何在 VueJS 中执行测试？](#125-如何在-VueJS-中执行测试)                                                        |
+| 126  | [如何为 CSS 应用 linting？](#126-如何为-CSS-应用-linting)                                                        |
+| 127  | [如何使用 eslint 插件？](#127-如何使用-eslint-插件)                                                              |
+| 128  | [什么是 eslint-loader？](#128-什么是-eslint-loader)                                                              |
+| 129  | [什么是 CSS extraction？](#129-什么是-CSS-extraction)                                                            |
+| 130  | [什么是自定义语言块？](#130-什么是自定义语言块)                                                                  |
 
 ## 1. VueJS 是什么？
 
@@ -2769,14 +2779,169 @@ module: {
 
 ```javascript
 module: {
-    rules: [
-        {
+    rules: [{
         test: /\.vue$/,
         loader: 'vue-loader',
         options: {
             hotReload: false // disables Hot Reload
         }
-        }
+    }]
+}
+```
+
+## 121. 如何使用热重载？
+
+vue-loader 插件内部使用了热重载。如果你用 vue-cli 搭建项目，热重载是开箱即用的，但如果你是手动搭建项目，可以通过 `webpack-dev-server --hot` 命令默认启动热重载。
+
+## 122. 什么是热重载中的状态保存规则？
+
+以下是热重载中的状态保存规则，
+
+1. 编辑组件的 `<template>` 时，组件实例将会重新渲染，保留当前所有的私有状态。
+2. 编辑组件的 `<script>` 时，组件实例将销毁并重新创建。
+3. 当编辑组件的 `<style>` 时，热重载通过 vue-style-loader 自己操作而不影响应用程序的状态。
+
+## 123. 如何使用 vue-loader 创建函数组件？
+
+你可以通过给 template 块添加一个 functional 属性来创建函数组件。
+
+```javascript
+<template functional>
+    <div>{{ props.msg }}</div>
+</template>
+```
+
+## 124. 如何在函数组件中访问全局属性？
+
+如果你需要访问定义在 `Vue.prototype` 上的全局属性，你可以通过 parent 从父元素访问。
+
+```javascript
+<template functional>
+    <div>{{ parent.$someProperty }}</div>
+</template>
+```
+
+## 125. 如何在 VueJS 中执行测试？
+
+你可以通过两种方式执行测试，
+
+1. **使用 vue-cli：** 提供了预配置的单元测试和 e2e 测试设置。
+2. **手动设置** 可以手动设置 `*.vue` 文件使用 mocha-webpack 或 jest。
+
+## 126. 如何为 CSS 应用 linting？
+
+stylelint linter 支持 linting vue 单文件组件的 style 部分。你可以如下对特定的 vue 文件执行 linter。
+
+```javascript
+stylelint MyComponent.vue
+```
+
+另一个选项是在 webpack 中配置 stylelint-webpack-plugin。可以配置为开发环境下的依赖项。
+
+```javascript
+// webpack.config.js
+const StyleLintPlugin = require('stylelint-webpack-plugin');
+module.exports = {
+    plugins: [
+        new StyleLintPlugin({
+            files: ['**/*.{vue,htm,html,css,sss,less,scss,sass}'],
+        })
     ]
+}
+```
+
+## 127. 如何使用 eslint 插件？
+
+官方的 `eslint-plugin-vue` 支持 linting Vue 单文件组件的 template 和 script 部分。你可以在你的 ESLint 配置中配置该插件。
+
+```javascript
+// .eslintrc.js
+module.exports = {
+    extends: [
+        "plugin:vue/essential"
+    ]
+}
+```
+
+你可以对特定的组件执行 linter 如下。
+
+```javascript
+eslint --ext js,vue MyComponent.vue
+```
+
+## 128. 什么是 eslint-loader？
+
+你可以通过使用 `eslint-loader` 在开发环境下保存文件时自动对 `*.vue` 文件 lint。
+
+```javascript
+npm install -D eslint eslint-loader
+```
+安装后还需要添加到 pre-loader。
+
+```javascript
+// webpack.config.js
+module.exports = {
+    module: {
+        rules: [{
+            enforce: 'pre',
+            test: /\.(js|vue)$/,
+            loader: 'eslint-loader',
+            exclude: /node_modules/
+        }]
+    }
+}
+```
+
+## 129. 什么是 CSS extraction？
+
+CSS Extraction 是用来将所有 Vue 组件中经过处理的 CSS 抽取到一个单独的 CSS 文件。
+
+```javascript
+npm install -D mini-css-extract-plugin
+```
+
+在 webpack 中配置插件。
+
+```javascript
+// webpack.config.js
+var MiniCssExtractPlugin = require('mini-css-extract-plugin')
+
+module.exports = {
+// other options...
+module: {
+    rules: [
+    // ... other rules omitted
+    {
+        test: /\.css$/,
+        use: [
+            process.env.NODE_ENV !== 'production'
+                ? 'vue-style-loader'
+                : MiniCssExtractPlugin.loader,
+            'css-loader'
+        ]
+    }
+    ]
+},
+plugins: [
+    // ... Vue Loader plugin omitted
+    new MiniCssExtractPlugin({
+        filename: 'style.css'
+    })
+]
+}
+```
+
+## 130. 什么是自定义语言块？
+
+你可以定义 `*.vue` 文件内的自定义语言块，基于块的 `lang` 属性、块的标记名、还有 webpack 配置的 rules。还可以使用 `resourceQuery` 对没有 lang 的自定义块匹配 rules。例如，匹配 `<message>` 自定义块。
+
+```javascript
+{
+    module: {
+        rules: [{
+            resourceQuery: /blockType=message/,
+            loader: 'loader-to-use'
+        }]
+    }
 }
 ```

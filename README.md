@@ -140,6 +140,16 @@ Original English version: [vuejs-interview-questions](https://github.com/sudheer
 | 128  | [什么是 eslint-loader？](#128-什么是-eslint-loader)                                                              |
 | 129  | [什么是 CSS extraction？](#129-什么是-CSS-extraction)                                                            |
 | 130  | [什么是自定义语言块？](#130-什么是自定义语言块)                                                                  |
+| 131  | [stylelint 的特点是什么？](#131-stylelint-的特点是什么)                                                          |
+| 132  | [vuex 应用构建的原则是什么？](#132-vuex-应用构建的原则是什么)                                                    |
+| 133  | [vuex 支持热重载吗？](#133-vuex-支持热重载吗)                                                                    |
+| 134  | [vuex store 的热重载 API 的目的是什么？](#134-vuex-store-的热重载-API-的目的是什么)                              |
+| 135  | [如何测试 mutations？](#135-如何测试-mutations)                                                                  |
+| 136  | [如何测试 getters？](#136-如何测试-getters)                                                                      |
+| 137  | [node 中运行测试的过程是怎样的？](#137-node-中运行测试的过程是怎样的)                                            |
+| 138  | [浏览器中运行测试的过程是怎样的？](#138-浏览器中运行测试的过程是怎样的)                                          |
+| 139  | [vuex 中使用严格模式的目的是什么？](#139-vuex-中使用严格模式的目的是什么)                                        |
+| 140  | [可以在生产环境使用严格模式吗？](#140-可以在生产环境使用严格模式吗)                                              |
 
 ## 1. VueJS 是什么？
 
@@ -158,7 +168,7 @@ Original English version: [vuejs-interview-questions](https://github.com/sudheer
 
 生命周期钩子是一个让你看到你正在使用的库是如何在后台工作的窗口。通过这些钩子，你可以知道你的组件何时被创建、添加进 DOM、更新、及销毁。在详细介绍每一个生命周期钩子之前，让我们一起先看一下生命周期的图表。
 
-<img src="https://github.com/sudheerj/vuejs-interview-questions-chinese/blob/master/images/vuelifecycle.png" width="400" height="800">
+![vuelifecycle](https://github.com/sudheerj/vuejs-interview-questions-chinese/blob/master/images/vuelifecycle.png)
 
 1. **Creation(初始化):** Creation 钩子允许你在你的组件被添加进 DOM 之前执行行为。如果你需要在客户端和服务端渲染期间设置一些操作则需要使用这些钩子。不同于其他钩子，creation 在服务端渲染期间也会运行。
 
@@ -2944,4 +2954,215 @@ plugins: [
         }]
     }
 }
+```
+
+## 131. stylelint 的特点是什么？
+
+以下是 stylelint 的主要特性
+
+1. 他有超过 160 条内置规则来捕获错误，应用限制，并执行风格的约定。
+2. 理解最新的 CSS 语法，包括自定义属性和 4 级选择器。
+3. 从 HTML，markdown， CSS-in-JS 对象和模板文本中抽离嵌入式样式。
+4. 解析如 SCSS，SASS，less，和 SugarSS 之类的类 CSS 语法。
+5. 支持重用社区的插件及创建自己的插件。
+
+## 132. vuex 应用构建的原则是什么？
+
+Vuex 应用了以下规则来构建任何应用。
+
+1. 集中在 store 中的应用级 state。
+2. 只有通过提交一个 mutations 这样一个同步的事务来改变 state。
+3. 同步的逻辑应该封装在 mutations 中并能够被 actions 操作。
+
+一个普通的应用程序项目结构如下。
+
+![vuex-app-structure.png](https://github.com/sudheerj/vuejs-interview-questions-chinese/blob/master/images/vuex-app-structure.png)
+
+## 133. vuex 支持热重载吗？
+
+是的，Vuex 支持在开发环境下为 mutations，modules，actions，getters 提供热重载。你需要使用 webpack 的热重载替换 API 或 browserify 的热重载替换插件。
+
+## 134. vuex store 的热重载 API 的目的是什么？
+
+`store.hotUpdate()` API 方法用于 mutations 和 modules。例如，你需要如下配置 Vuex。
+
+```javascript
+// store.js
+import Vue from 'vue'
+import Vuex from 'vuex'
+import mutations from './mutations'
+import myModule from './modules/myModule'
+
+Vue.use(Vuex)
+
+const state = { message: "Welcome to hot reloading" }
+
+const store = new Vuex.Store({
+    state,
+    mutations,
+    modules: {
+        moduleA: myModule
+    }
+})
+
+if (module.hot) {
+    // accept actions and mutations as hot modules
+    module.hot.accept(['./mutations', './modules/newMyModule'], () => {
+        // Get the updated modules
+        const newMutations = require('./mutations').default
+        const newMyModule = require('./modules/myModule').default
+        //swap in the new modules and mutations
+        store.hotUpdate({
+            mutations: newMutations,
+            modules: {
+                moduleA: newMyModule
+            }
+        })
+    })
+}
+```
+
+## 135. 如何测试 mutations？
+
+因为 mutations 是完全依赖它的参数的函数，所以也更容易测试。你需要将mutations 保存在 store.js 中并且以 mutations 命名导出。举一个 increment mutations 的例子。
+
+```javascript
+// mutations.js
+export const mutations = {
+    increment: state => state.counter++
+}
+```
+
+以下使用 mocha 和 chai 测试它们。
+
+```javascript
+// mutations.spec.js
+import { expect } from 'chai'
+import { mutations } from './store'
+
+// destructure assign `mutations`
+const { increment } = mutations
+
+describe('mutations', () => {
+    it('INCREMENT', () => {
+        // mock state
+        const state = { counter: 10 }
+        // apply mutation
+        increment(state)
+        // assert result
+        expect(state.counter).to.equal(11)
+    })
+})
+```
+
+## 136. 如何测试 getters？
+
+类似于 mutations 的测试，getters 的测试更容易。如果 getters 有复杂的计算，建议对它们进行测试。
+举一个简单的 todo filter 作为 getters 的例子。
+
+```javascript
+// getters.js
+export const getters = {
+    filterTodos (state, status) {
+        return state.todos.filter(todo => {
+        return todo.status === status
+        })
+    }
+}
+```
+
+上面 getters 的测试用例如下。
+
+```javascript
+// getters.spec.js
+import { expect } from 'chai'
+import { getters } from './getters'
+
+describe('getters', () => {
+    it('filteredTodos', () => {
+        // mock state
+        const state = {
+            todos: [
+                { id: 1, title: 'design', status: 'Completed' },
+                { id: 2, title: 'testing', status: 'InProgress' },
+                { id: 3, title: 'development', status: 'Completed' }
+            ]
+        }
+        // mock getter
+        const filterStatus = 'Completed'
+
+        // get the result from the getter
+        const result = getters.filterTodos(state, filterStatus)
+
+        // assert the result
+        expect(result).to.deep.equal([
+            { id: 1, title: 'design', status: 'Completed' },
+            { id: 2, title: 'development', status: 'Completed' }
+        ])
+    })
+})
+```
+
+## 137. node 中运行测试的过程是怎样的？
+
+通过适当的 mocking，你可以将 tests 和 webpack 打包在一起并在 node 上运行而不需要依赖浏览器 API。这包括两步。
+
+1. **创建 webpack 配置：** 创建 webpack 配置及恰当的 .babelrc
+
+```javascript
+// webpack.config.js
+module.exports = {
+    entry: './test.js',
+    output: {
+        path: __dirname,
+        filename: 'test-bundle.js'
+    },
+    module: {
+        loaders: [
+        {
+            test: /\.js$/,
+            loader: 'babel-loader',
+            exclude: /node_modules/
+        }
+        ]
+    }
+}
+```
+
+2. **执行测试用例：** 首先你需要打包，再使用 mocha 执行测试用例。
+
+```javascript
+webpack
+mocha test-bundle.js
+```
+
+## 138. 浏览器中运行测试的过程是怎样的？
+
+以下是再真实浏览器上执行测试的步骤。
+
+1. 安装 `mocha-loader`。
+2. 配置 webpack 的 entry 为 `mocha-loader!babel-loader!./test.js`。
+3. 开始 webpack-dev-server 使用配置。
+4. 访问 localhost:8080/webpack-dev-server/test-bundle 查看测试结果。
+
+## 139. vuex 中使用严格模式的目的是什么？
+
+在严格模式中，无论何时只要 state 的改变是在 mutations 之外被操作的，都将会抛出一个错误。这确保了所有状态的改变都可以被调试工具显式跟踪。可以通过 `strict: true` 配置开启。
+
+```javascript
+const store = new Vuex.Store({
+    // ...
+    strict: true
+})
+```
+
+## 140. 可以在生产环境使用严格模式吗？
+
+不行，不建议在生产环境中使用严格模式。严格模式在状态树上运行了一个同步的深度检测器，用来检测不适当的 mutations，当执行大量 mutations 时，这里的开销会非常昂贵。也就是说，如果应用在生产环境中会影响性能。应该通过构建工具处理。
+
+```javascript
+const store = new Vuex.Store({
+    // ...
+    strict: process.env.NODE_ENV !== 'production'
+})
 ```

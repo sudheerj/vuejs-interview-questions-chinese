@@ -8,8 +8,8 @@ Original English version: [vuejs-interview-questions](https://github.com/sudheer
 
 ## 内容列表
 
-| 序号 | 问题                                                                                                             |
-|------|------------------------------------------------------------------------------------------------------------------|
+| 序号 | 问题                                                                                                            |
+|------|---------------------------------------------------------------------------------------------------------------|
 | 1    | [VueJS 是什么？](#1-vuejs-是什么)                                                                                |
 | 2    | [VueJS 的主要功能是什么？](#2-vuejs-的主要功能是什么)                                                            |
 | 3    | [VueJS 的生命周期方法是什么？](#3-vuejs-的生命周期方法是什么)                                                    |
@@ -150,6 +150,16 @@ Original English version: [vuejs-interview-questions](https://github.com/sudheer
 | 138  | [浏览器中运行测试的过程是怎样的？](#138-浏览器中运行测试的过程是怎样的)                                          |
 | 139  | [vuex 中使用严格模式的目的是什么？](#139-vuex-中使用严格模式的目的是什么)                                        |
 | 140  | [可以在生产环境使用严格模式吗？](#140-可以在生产环境使用严格模式吗)                                              |
+| 141  | [什么是 vuex 插件？](#141-什么是-vuex-插件)                                                                      |
+| 142  | [如何在插件中改变状态？](#142-如何在插件中改变状态)                                                              |
+| 143  | [vuex store 是什么？](#143-vuex-store-是什么)                                                                    |
+| 144  | [vuex store 和普通的全剧对象有什么不同？](#144-vuex-store-和普通的全剧对象有什么不同)                            |
+| 145  | [不直接更新 state 的原因是什么？](#145-不直接更新-state-的原因是什么)                                            |
+| 146  | [什么是单状态树？](#146-什么是单状态树)                                                                          |
+| 147  | [如何安装 vuex？](#147-如何安装-vuex)                                                                            |
+| 148  | [为 vuex 提供 promise？](#148-为-vuex-提供-promise)                                                              |
+| 149  | [如何在 vue 组建中显示 state？](#149-如何在-vue-组建中显示-state)                                                |
+| 150  | [如何将 store 注入子组件？](#150-如何将-store-注入子组件)                                                        |
 
 ## 1. VueJS 是什么？
 
@@ -1982,18 +1992,18 @@ render: function (createElement) {
 
 VueJS 为模板功能提供了专有的替代方案和简单的 JavaScript 用法。让我们把它们列在一张表格里比较一下，
 
-| 模板                                           | Render 函数                                               |
-|------------------------------------------------|-----------------------------------------------------------|
+| 模板                                          | Render 函数                                               |
+|---------------------------------------------|-----------------------------------------------------------|
 | 条件和循环指令：v-if 和 v-for                  | 使用 JS 的 if/else 和映射概念                             |
 | 双向绑定：v-model                              | 使用值绑定和事件绑定应用自己的 JS 逻辑                    |
-| 捕获事件修饰符：.passive、.capture、.once      | &, !, ~                                                   |
+| 捕获事件修饰符：.passive、.capture、.once        | &, !, ~                                                   |
 | 捕获事件修饰符：.capture.once 或 .once.capture | ~!                                                        |
 | 事件修饰符：.stop                              | event.stopPropagation()                                   |
 | 事件修饰符：.prevent                           | event.preventDefault()                                    |
 | 事件修饰符：.self                              | if (event.target !== event.currentTarget) return          |
 | 键修饰符：.enter, .13                          | if (event.keyCode !== 13) return                          |
 | 修饰符键：.ctrl, .alt, .shift, .meta           | if (!event.ctrlKey) return                                |
-| slot 属性                                      | render 函数提供 this.$slots 和 this.$scopedSlots 实例属性 |
+| slot 属性                                     | render 函数提供 this.$slots 和 this.$scopedSlots 实例属性 |
 
 ## 73. 什么是功能组件？
 
@@ -2032,7 +2042,7 @@ Even though ReactJS and VueJS are two different frameworks there are few similar
 尽管 VueJS 和 ReactJS 有一些功能共享，但也有一些不同，以表格的形式列出。
 
 | 功能         | VueJS                          | ReactJS                        |
-|--------------|--------------------------------|--------------------------------|
+|------------|--------------------------------|--------------------------------|
 | 类型         | JavaScript MVC 框架            | JavaScript 库                  |
 | 平台         | 主要关注 Web 开发              | Web 和 原生                    |
 | 学习曲线     | 陡峭的学习曲线并且需要深入知识 | 陡峭的学习曲线并且需要深入知识 |
@@ -2058,15 +2068,15 @@ Even though ReactJS and VueJS are two different frameworks there are few similar
 
 Vue 和 Angular 的语法在某些地方很常见，因为 Angular 是 Vuejs 开发的基础。但是 Vuejs 和 Angular 之间也有很多不同之处，
 
-| 功能     | VueJS                          | AngularJS                                                |
-|----------|--------------------------------|----------------------------------------------------------|
-| 复杂度   | 易于学习，简单的 API 和设计    | 这个框架有点庞大，需要一些 typescript 等方面的学习曲线。 |
-| 数据绑定 | 单向绑定                       | 双向绑定                                                 |
-| 学习曲线 | 陡峭的学习曲线并且需要深入知识 | 陡峭的学习曲线并且需要深入知识                           |
-| 创办者   | 由前谷歌员工创建               | 由谷歌提供支持                                           |
-| 初版本   | 2014年2月                      | 2016年9月                                                |
-| 模型     | 基于虚拟 DOM（文档对象模型）   | 基于MVC（模型-视图-控制器）                              |
-| 编写     | JavaScript                     | TypeScript                                               |
+| 功能     | VueJS                          | AngularJS                                              |
+|--------|--------------------------------|--------------------------------------------------------|
+| 复杂度   | 易于学习，简单的 API 和设计     | 这个框架有点庞大，需要一些 typescript 等方面的学习曲线。 |
+| 数据绑定 | 单向绑定                       | 双向绑定                                               |
+| 学习曲线 | 陡峭的学习曲线并且需要深入知识 | 陡峭的学习曲线并且需要深入知识                         |
+| 创办者   | 由前谷歌员工创建               | 由谷歌提供支持                                         |
+| 初版本   | 2014年2月                      | 2016年9月                                              |
+| 模型     | 基于虚拟 DOM（文档对象模型）     | 基于MVC（模型-视图-控制器）                              |
+| 编写     | JavaScript                     | TypeScript                                             |
 
 ## 79. 什么是动态组件？
 
@@ -3165,4 +3175,199 @@ const store = new Vuex.Store({
     // ...
     strict: process.env.NODE_ENV !== 'production'
 })
+```
+
+## 141. 什么是 vuex 插件？
+
+vuex 是一个选项，为每次 mutation 暴露钩子。它是一个普通的函数接收 store 作为唯一的参数。你可以创建一个自己的插件或使用内置插件。
+插件的结构如下，
+
+```javascript
+const myPlugin = store => {
+    // 当 store 初始化后调用
+    store.subscribe((mutation, state) => {
+        // 每次 mutation 后调用
+        // mutation 的格式为 `{ type, payload }`.
+    })
+}
+```
+之后插件可以配置在如下的 plugins 选项中，
+
+```javascript
+const store = new Vuex.Store({
+    // ...
+    plugins: [myPlugin]
+})
+```
+
+## 142. 如何在插件中改变状态？
+
+类似于组件，你不能直接改变 state，但可以通过提交 mutation 触发改变。这是插件能用来同步数据源到 store 的方式。
+例如，createWebSocketPlugin 插件被用来同步 websocket 数据源到 store。
+
+```javascript
+export default function createWebSocketPlugin (socket) {
+    return store => {
+        socket.on('data', data => {
+            store.commit('receiveData', data)
+        })
+        store.subscribe(mutation => {
+            if (mutation.type === 'UPDATE_DATA') {
+                socket.emit('update', mutation.payload)
+            }
+        })
+    }
+}
+```
+
+接下来在 vuex store 中配置插件，
+
+```javascript
+const plugin = createWebSocketPlugin(socket)
+
+const store = new Vuex.Store({
+    state,
+    mutations,
+    plugins: [plugin]
+})
+```
+
+## 143. vuex store 是什么？
+
+vuex store 是容纳你的应用程序 state 的容器。store 的创建非常简单。
+以下是一个 increment 应用程序的说明列表，
+
+1. 在 vue 生态系统中配置 vuex
+
+```javascript
+import Vuex from "vuex";
+Vue.use(Vuex)
+```
+
+2. 提供一个初始 state 对象和一些 mutation
+```javascript
+// 确保首先调用了 Vue.use(Vuex)
+const store = new Vuex.Store({
+    state: {
+        count: 0
+    },
+    mutations: {
+        increment (state) {
+            state.count++
+        }
+    }
+})
+```
+
+3. 通过 commit 触发状态更改
+
+```javascript
+store.commit('increment')
+
+console.log(store.state.count) // -> 1
+```
+
+## 144. vuex store 和普通的全剧对象有什么不同？
+
+以下是 vuex store 和普通的全局对象主要的不同
+1. **Vuex stores 是响应式的：** 如果 store 中 state 改变了，vue 组件将响应式的高效的获取更新；
+2. **不能直接改变 store 的 state：** store 的 state 的改变必须通过明确地提交 mutations 来确保每次 state 改变都会留下可跟踪工具的记录；
+
+## 145. 不直接更新 state 的原因是什么？
+
+我们想要明确地跟踪应用的 state 为了执行工具可以记录每次 mutation，state 快照，甚至执行实践旅行的调试。因此我们需要提交 mutation 代替直接修改 state。
+
+## 146. 什么是单状态树？
+
+Vuex 的单状态树是单个对象，包含所有应用程序级别状态，并充当“单一 truth 来源”。将 state 和 mutation 拆分为子模块时，它与模块性不冲突。
+
+## 147. 如何安装 vuex？
+
+你可以使用 npm 或 yarn 安装如下，
+
+```javascript
+npm install vuex --save
+(or)
+yarn add vuex
+```
+
+在模块化系统中必须明确注册 vuex 通过 Vue.use()
+
+```javascript
+import Vue from 'vue'
+import Vuex from 'vuex'
+
+Vue.use(Vuex)
+```
+
+你也可以使用 cdn 链接如 unpkg.com。在 vue 之后引入 vuex 则会自动注册。
+
+```javascript
+<script src="https://unpkg.com/vue.js"></script>
+<script src="https://unpkg.com/vuex.js"></script>
+```
+
+**笔记：** 你可以使用特定版本，通过如 https://unpkg.com/vuex@2.0.0 的链接地址。如果没有提到任何版本则会指向最新版。
+
+## 148. 为 vuex 提供 promise？
+
+是的，vuex 引入 Promise。如果你支持的浏览器没有部署 Promise（如 IE），你可以通过引入 polyfill 库 es6-promise。
+
+```javascript
+npm install es6-promise --save # NPM
+yarn add es6-promise # Yarn
+```
+
+安装之后在程序的任意地方引入
+
+```javascript
+import 'es6-promise/auto'
+```
+
+## 149. 如何在 vue 组建中显示 state？
+
+因为 vuex store 是响应式的，你可以简单的通过一个计算属性从 store 中检索 state 并返回。任何时候 store 的状态改变，它将导致计算属性重新求值，并出发相关的 DOM 更新。让我们写一个 hello world 组件在模板中展示 store 的状态。
+
+```javascript
+//  创建一个 hello world 组件
+const Greeting = {
+template: `<div>{{ greet }}</div>`,
+    computed: {
+        greet () {
+            return store.state.msg
+        }
+    }
+}
+```
+
+## 150. 如何将 store 注入子组件？
+
+vuex 提供了一个机制用来从根组件的 store 选项将 store 注入到所有的子组件。通过 vue.use(vuex) 启用。
+例如，注入到 app 组件如下，
+
+```javascript
+const app = new Vue({
+    el: '#app',
+    // store 选项用来将 store 实例注册到所有子组件中
+    store,
+    components: { Greeting },
+    template: `
+        <div class="app">
+            <greeting></greeting>
+        </div>
+    `
+})
+```
+
+现在 store 将被注入到根组件的所有子组件中，将通过 **this.$store** 获取。
+
+```javascript
+const Greeting = {
+    template: `<div>{{ greet }}</div>`,
+    computed: {
+        greet () {
+            return this.$store.state.msg
+        }
+    }
+}
 ```
